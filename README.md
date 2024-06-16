@@ -1,1 +1,1 @@
-CordCrafter is a bot I made for GunjiCordia.
+# CordCrafter is a bot I made for GunjiCordia.
