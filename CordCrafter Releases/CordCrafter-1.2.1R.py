@@ -171,7 +171,7 @@ Reason: `{reason}`.
 ''')
     logembed.set_footer(text=f'Responsible Moderator: {ctx.user.display_name}. Offender ID: {offender.id}.')
     logembed.set_thumbnail(url=red_badge_image)
-    await kicklog.send(file=file,embed=logembed)
+    await kicklog.send(embed=logembed)
     await kickedoffenderdm.send(f'''Hi. I am here to inform you you have been kicked from GunjiCordia.
 The reason for your kick has been: `{reason}`.
 The moderator responsible for your kick was <@{ctx.user.id}>.
