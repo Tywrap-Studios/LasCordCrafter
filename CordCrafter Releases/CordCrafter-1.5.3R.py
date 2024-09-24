@@ -936,7 +936,7 @@ async def sub_command(ctx:discord.Interaction,player_user:str,duration:str,reaso
     else:
         reason1 = f' {reason}'
     if re.match(duregex, duration_v2):
-        command = f'/tempban {player_user} {duration}{reason1}'
+        command = f'/tempban {player_user} {duration_v2}{reason1}'
         await send_rcon(command,ctx,True)
     else:
         embed = discord.Embed(colour=discord.Colour.red(),description=f'<:warn:1249069667159638206> `{duration}` does not seem like a valid duration type even when corrected to `{duration_v2}` by our system!\n\n> <:info:1278823933717512232> A correct one would be: <number><either s, m, d or w> (e.g. 1w for 1 week.)\n> If you think it should actually be correct, please report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and show this Embed.\n-# {botversion}',title='RCON: <:resources:1278835693900136532>')
