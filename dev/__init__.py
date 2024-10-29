@@ -11,7 +11,7 @@ TO DO INFO:
 >WIP, a Work In Progress feature, can be added any update, and doesn't have to be finished on a deadline.
 >GOAL, should be finished and fixed before the next update.
 >CRUCIAL, HAS to be finished and fixed before the next update can be posted.
-
+An [int] tag after this just gives it an identifier to be used in Commit messages.
 """
 
 __title__ = 'CordCrafter'

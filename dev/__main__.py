@@ -3,7 +3,6 @@ import logging
 import time
 from typing import Optional
 
-import asyncpg
 import discord
 from aiohttp import ClientSession
 from discord.ext import commands
@@ -20,13 +19,11 @@ class CordBot(commands.Bot):
     def __init__(
             self,
             *args,
-            db_pool: asyncpg.Pool,
             web_client: ClientSession,
             testing_guild_id: Optional[int] = None,
             **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.db_pool = db_pool
         self.web_client = web_client
         self.testing_guild_id = testing_guild_id
         self._start_time = None
@@ -99,7 +96,6 @@ class CordBot(commands.Bot):
         return self
 
 
-# TODO>CRUCIAL
 async def main():
     logger = logging.getLogger('discord')
     logger.setLevel(logging.DEBUG)
@@ -113,7 +109,7 @@ async def main():
     with open(vars.log_dir_path + 'cordcrafter.log', 'w') as file:
         file.write(f'// Log file init at {util.time}\n\n')
 
-    async with ClientSession() as our_client, asyncpg.create_pool(user='postgres', command_timeout=30) as pool:
+    async with ClientSession() as our_client:
         # Intents
         intents = discord.Intents.default()
         intents.members = True
@@ -124,8 +120,7 @@ async def main():
         intents.auto_moderation_execution = True
         intents.message_content = True
         async with CordBot(
-                '$',
-                db_pool=pool,
+                '>>',
                 web_client=our_client,
                 intents=intents,
         ) as cord_bot:

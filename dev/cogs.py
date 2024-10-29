@@ -324,7 +324,7 @@ class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # TODO>GOAL: This currently does not work.
+    # TODO>GOAL[2]: This currently does not work.
     # @bot.tree.context_menu(name='Sanitize & Dehoist')
     # @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     # async def context(self, ctx, member: discord.Member):
