@@ -76,3 +76,4 @@ fabric.properties
 # Private Files:
 *.env
 logs/
+temp*
