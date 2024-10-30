@@ -21,7 +21,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await bot_events.on_ready()
+        await bot_events.on_ready(self.bot)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -324,7 +324,7 @@ class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # TODO>GOAL[2]: This currently does not work.
+    # TODO>GOAL[2]: This currently does not work, Cogs don't seem to allow for Context Menus
     # @bot.tree.context_menu(name='Sanitize & Dehoist')
     # @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     # async def context(self, ctx, member: discord.Member):

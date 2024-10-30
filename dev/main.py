@@ -38,9 +38,6 @@ class CordBot(commands.Bot):
  | |__| (_) | | | (_| | |___| | | (_| |  _| ||  __/ |      | |  _  | (_) |  _  | |_| |
   \____\___/|_|  \__,_|\____|_|  \__,_|_|  \__\___|_|      |_| (_)  \___/  (_)  \___/ ''')
         info('-------------------------------------------Init-------------------------------------------')
-        info('Setting Discord Bot Status. . .')
-        await self.change_presence(activity=discord.Game('on CordCraft Season 2.'), status=discord.Status.online)
-        info(f'Discord Bot Status Set.')
         info(f'Starting Tasks. . .')
         tasks.task_loop.start()
         info(f'Tasks Started.')

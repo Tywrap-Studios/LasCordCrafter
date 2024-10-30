@@ -11,7 +11,10 @@ from util import info
 
 
 # On Ready:
-async def on_ready() -> None:
+async def on_ready(bot: commands.Bot) -> None:
+    info(f'[{util.time()}] >LOG> Setting Discord Bot Status. . .')
+    await bot.change_presence(activity=discord.Game('on CordCraft Season 2.'), status=discord.Status.online)
+    info(f'[{util.time()}] >LOG> Discord Bot Status Set.')
     info(f'[{util.time()}] >EVENT> Bot Ready.')
 
 
