@@ -34,7 +34,8 @@ async def sanitize(ctx, member):
         wet_name = re.sub(vars.repatce, '', nick)
         if len(wet_name) < 1:
             wet_name = 'Robin'
-        clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
+        clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True,
+                                           retain_diacritics=True)
         clean_name = f'{clean_name_cs}'
         await member.edit(nick=clean_name)
         await send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.',
@@ -50,7 +51,8 @@ async def sanitize(ctx, member):
             info(f'[{time()}] >LOG> Member sanitized: {nick} -> {clean_name}.]')
     else:
         wet_name = nick
-        clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
+        clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True,
+                                           retain_diacritics=True)
         clean_name = f'{clean_name_cs}'
         if clean_name != nick:
             await member.edit(nick=clean_name)
@@ -64,6 +66,43 @@ async def sanitize(ctx, member):
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'"`{nick}`" seems fine and is not cancerous or intentionally hoisted.\nIf you think it is, please make a [GitHub Issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and send the Debug Info.')
             await ctx.response.send_message(embed=embed, ephemeral=True, view=view)
+
+
+def format_duration(text: str) -> str:
+    text = text.replace("seconds", "s")
+    text = text.replace("second", "s")
+    text = text.replace("minutes", "m")
+    text = text.replace("minute", "m")
+    text = text.replace("hours", "h")
+    text = text.replace("hour", "m")
+    text = text.replace("days", "d")
+    text = text.replace("day", "d")
+    text = text.replace("weeks", "w")
+    text = text.replace("week", "w")
+    text = text.replace(" ", "")
+    return text
+
+
+def from_formatted_get_int(formatted_string: str) -> int:
+    return int(f"0{re.sub('[a-z,A-Z]', '', formatted_string)}")
+
+
+def from_formatted_get_str(formatted_string: str) -> str:
+    return re.sub('\d+', '', formatted_string)
+
+
+def get_duration_in_days(duration_str: str, duration_int: int) -> float:
+    if duration_str == 's':
+        return duration_int * 0.000012
+    if duration_str == 'm':
+        return duration_int * 0.000694
+    if duration_str == 'h':
+        return duration_int * 0.041667
+    if duration_str == 'd':
+        return duration_int
+    if duration_str == 'w':
+        return duration_int * 7
+    return 1
 
 
 def time():

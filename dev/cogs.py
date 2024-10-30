@@ -121,7 +121,7 @@ And hey, if you're there already, why not read the rules?
             else:
                 bot_status = f'**There might be a slight complication.** <a:unstable:1278830948120789064>\n<:arrow_under:1278834153655107646>**Message:** {bot_status_raw.state}'
         status_embed = discord.Embed(colour=discord.Colour.from_rgb(70, 230, 210), title='CordCrafter Status.',
-                                    description=f'''----------------------------
+                                     description=f'''----------------------------
 <:space:1251655233919123628><:speed:1251649973418983565> **Latency:** {latency_val}
 <:space:1251655233919123628><:uptime:1251648456301346946> **Uptime:** `{uptime}`
 <:space:1251655233919123628><:info:1278823933717512232> **Bot Ver:** `{vars.botVersion}`
@@ -216,7 +216,8 @@ And hey, if you're there already, why not read the rules?
 
 -# MIT; Copyright 2024 Tywrap Studios. -- info.tywrap.studio@gmail.com -- {vars.botVersion}
     '''
-        embed = discord.Embed(colour=discord.Colour.teal(), title='<:list:1279213268082229381> Credits:', description=description)
+        embed = discord.Embed(colour=discord.Colour.teal(), title='<:list:1279213268082229381> Credits:',
+                              description=description)
         await ctx.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /credits.')
 
@@ -247,7 +248,8 @@ class AppealServiceCog(commands.Cog):
     @commands.hybrid_command(name='add', description='Adds a user to the current ticket.')
     async def slash_command(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
-            await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+            await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
+                                              embed_links=True)
             view = views.RemoveButton(member=member)
             ping = await ctx.channel.send(f'{member.mention}')
             await ping.delete()
@@ -331,7 +333,8 @@ class SanitizeServiceCog(commands.Cog):
     #     await util.sanitize(ctx, member)
     #     info(f'[{util.time()}] >LOG> {ctx.author.name} sanitized {member.name} using CM.]')
 
-    @commands.hybrid_command(name='sanitize', description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
+    @commands.hybrid_command(name='sanitize',
+                             description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     async def context(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
@@ -1001,7 +1004,8 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
                 await ctx.response.send_message('Attempted to change status.', ephemeral=True)
                 info(f'[{util.time()}] >STATUS> {ctx.author.name} changed bot status: {status}.')
             else:
-                await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'), status=discord.Status.online)
+                await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'),
+                                               status=discord.Status.online)
                 await ctx.response.send_message('Attempted to reset status.', ephemeral=True)
                 info(f'[{util.time()}] >STATUS> {ctx.author.name} reset the bot status.')
         else:
@@ -1099,3 +1103,140 @@ Obviously given you own the thread or if you would have been able to modify it e
         embed = discord.Embed(title=f'Info about {thread.mention}', description=description)
         await ctx.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.author.name} viewed info about {thread.name}.')
+
+
+class ModCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.hybrid_group(name='moderation', description='Root for the Moderation commands.')
+    async def moderation(self, ctx):
+        description = f'''> The `/moderation` Command Group is a group of commands related to Discord server moderation.
+They provide a way to quickly e.g. ban/unban people, or to lock/unlock a channel.'''
+        embed = discord.Embed(colour=discord.Colour.blurple(),
+                              title='<:info:1278823933717512232> Info:', description=description)
+        await ctx.response.send_message(embed=embed, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {ctx.author.name} ran /moderation.]')
+
+    @moderation.command(name='ban', description='Bans a user.')
+    @discord.app_commands.checks.has_permissions(ban_members=True)
+    async def sub_command(self, ctx, offender: discord.Member, reason: Optional[str] = 'No reason given',
+                          time: Optional[str] = 'infinite', delete_messages: Optional[bool] = False,
+                          silent: Optional[bool] = False):
+        offender_dm = await offender.create_dm()
+        reason_for_audit = f'{ctx.user.mention}: {reason}.'
+        if delete_messages:
+            del_days = 7
+        else:
+            del_days = 0
+        await offender_dm.send(content=f'''Hi. Unfortunately I am here to inform you that you have been banned from GunjiCordia.
+The reason for your ban was: **{reason}**.
+The length of your ban is: **{time} day(s)**.
+The moderator responsible for your ban was {ctx.user.mention}.
+
+If you think this ban was not rightful, or an actual accident feel free to contact said, or a different moderator.
+
+This ban will not be removed automatically. That feature is sadly not implemented into this bot yet. If the time is over and you have not been unbanned yet. Please contact a moderator.
+I wish you a great day further!''')
+        await offender.ban(reason=reason_for_audit, delete_message_days=del_days)
+        embed = discord.Embed(description=f'{offender.mention} was banned from the server. <:red:1249075916907348068>',
+                              colour=discord.Colour.red())
+        await ctx.response.send_message(embed=embed, ephemeral=silent)
+
+    @moderation.command(name='unban', description='Unbans a user.')
+    @discord.app_commands.checks.has_permissions(ban_members=True)
+    async def sub_command(self, ctx, offender: discord.User, reason: Optional[str] = 'No reason given',
+                          silent: Optional[bool] = False):
+        reason = f'{ctx.user.mention}: {reason}.'
+        await ctx.guild.unban(offender, reason=reason)
+        embed = discord.Embed(colour=discord.Colour.green(),
+                              description=f'{offender.mention} was unbanned from the server. <:green:1249075836196360204>')
+        await ctx.response.send_message(embed=embed, ephemeral=silent)
+
+    @moderation.command(name='kick', description='Kicks a user.')
+    @discord.app_commands.checks.has_permissions(kick_members=True)
+    async def slash_command(self, ctx, offender: discord.Member, reason: Optional[str] = 'No reason given',
+                            silent: Optional[bool] = False):
+        offender_dm = await offender.create_dm()
+        reason_for_audit = f'{ctx.user.mention}: {reason}.'
+        await offender_dm.send(f'''Hi. I am here to inform you that you have been kicked from GunjiCordia.
+The reason for your kick was: `{reason}`.
+The moderator responsible for your kick was {ctx.user.mention}.
+
+If you wish to join back, here is the Discord Invite Link: {vars.guildInviteLink}
+I wish you a great day further!''')
+        await offender.kick(reason=reason_for_audit)
+        embed = discord.Embed(description=f'{offender.mention} was kicked from the server. <:red:1249075916907348068>',
+                              colour=discord.Colour.red())
+        await ctx.response.send_message(embed=embed, ephemeral=silent)
+
+    @moderation.command(name='timeout', description='Times out a user.')
+    @discord.app_commands.checks.has_permissions(mute_members=True)
+    async def slash_command(self, ctx, offender: discord.Member, duration: str,
+                            reason: Optional[str] = 'No reason given', silent: Optional[bool] = False):
+        dur = util.format_duration(duration)
+        dur_int = util.from_formatted_get_int(dur)
+        dur_str = util.from_formatted_get_str(dur)
+        dur_days = util.get_duration_in_days(dur_str, dur_int)
+        reason = f'{ctx.user.mention}: {reason}.'
+        invalid = False
+        handled = False
+
+        if dur_days > 28 or dur_days == 0 and not invalid:
+            embed = discord.Embed(
+                description=f'<:warn:1249069667159638206> `{duration}`, even when automatically corrected to `{dur}` by our system, is an invalid duration length!\n\n> <:info:1278823933717512232> Note: The technical limit is 28 days.\n> If you think it should actually be correct, please report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and show this Embed.\n-# {vars.botVersion} | {dur}:{dur_int}:{dur_str}:{dur_days}',
+                colour=discord.Colour.red())
+            await ctx.response.send_message(embed=embed, ephemeral=True)
+            invalid = True
+            handled = True
+        if dur_str != 's' and dur_str != 'm' and dur_str != 'h' and dur_str != 'd' and dur_str != 'w' and not invalid:
+            embed = discord.Embed(
+                description=f'<:warn:1249069667159638206> `{duration}` does not seem like a valid duration even when automatically corrected to `{dur}` by our system!\n\n> <:info:1278823933717512232> A correct format would be: e.g. 1w, 1 week, 6 days, 2h.\n> If you think it should actually be correct, please report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and show this Embed.\n-# {vars.botVersion} | {dur}:{dur_int}:{dur_str}:{dur_days}',
+                colour=discord.Colour.red())
+            await ctx.response.send_message(embed=embed, ephemeral=True)
+            invalid = True
+            handled = True
+
+        if 's' == dur_str and not invalid and not handled:
+            embed = discord.Embed(
+                description=f'{offender.mention} was timed out for {dur_int} second(s). <:blue:1249075855204810762>',
+                colour=discord.Colour.blue())
+            await offender.timeout(timedelta(seconds=dur_int), reason=reason)
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            invalid = False
+            handled = True
+        if 'm' == dur_str and not invalid and not handled:
+            embed = discord.Embed(
+                description=f'{offender.mention} was timed out for {dur_int} minutes(s). <:blue:1249075855204810762>',
+                colour=discord.Colour.blue())
+            await offender.timeout(timedelta(minutes=dur_int), reason=reason)
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            invalid = False
+            handled = True
+        if 'h' == dur_str and not invalid and not handled:
+            embed = discord.Embed(
+                description=f'{offender.mention} was timed out for {dur_int} hours(s). <:blue:1249075855204810762>',
+                colour=discord.Colour.blue())
+            await offender.timeout(timedelta(hours=dur_int), reason=reason)
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            invalid = False
+            handled = True
+        if 'd' == dur_str and not invalid and not handled:
+            embed = discord.Embed(
+                description=f'{offender.mention} was timed out for {dur_int} days(s). <:blue:1249075855204810762>',
+                colour=discord.Colour.blue())
+            await offender.timeout(timedelta(days=dur_int), reason=reason)
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            invalid = False
+            handled = True
+        if 'w' == dur_str and not invalid and not handled:
+            embed = discord.Embed(
+                description=f'{offender.mention} was timed out for {dur_int} week(s). <:blue:1249075855204810762>',
+                colour=discord.Colour.blue())
+            await offender.timeout(timedelta(weeks=dur_int), reason=reason)
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
+
+    @moderation.command(name='lock', description='Lock or unlock the channel.')
+    @discord.app_commands.checks.has_permissions(mute_members=True)
+    async def sub_command(self, ctx, channel: Optional[discord.TextChannel]):
+        return NotImplemented
