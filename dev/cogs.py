@@ -1239,4 +1239,4 @@ I wish you a great day further!''')
     @moderation.command(name='lock', description='Lock or unlock the channel.')
     @discord.app_commands.checks.has_permissions(mute_members=True)
     async def sub_command(self, ctx, channel: Optional[discord.TextChannel]):
-        return NotImplemented
+        pass
