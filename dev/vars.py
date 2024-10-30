@@ -22,10 +22,10 @@ sanitization_webhook_url = sanitization_webhook_url_env
 
 # Bot Stuff
 botToken = botToken_env
-botId = '1213859965836595260'  # Interchangeable
+botId = '1213859965836595260'  # Interchangeable, please change for final release.
 botPing = f'<@{botId}>'
-botVersion = 'CordCrafter 1.6.0 [RELEASE]'  # Interchangeable
-botName = 'CordTester'  # Interchangeable
+botVersion = 'CordCrafter 1.6.0 [RELEASE]'  # Interchangeable, please change for final release.
+botName = 'CordTester'  # Interchangeable, please change for final release.
 botDescription = '''This is a Bot made by Tywrap Studios for the GunjiCordia Discord server to help people and others in the wonderful server that is Gunji's that he crafted back in july of 2023'''
 
 # Links
@@ -43,6 +43,7 @@ duregex = '^\d+\w*[smdw]$'
 
 # NOTE THAT CONSTS WITH A COMMENT BEHIND IT SHOULD HAVE THE COMMENTED VALUE ON-RELEASE!
 # THE CURRENT VALUES ARE MERELY TEST VALUES!
+
 # Tags
 trusted_team_tag_id = 1287526517248622592  # 1287179981843206144
 

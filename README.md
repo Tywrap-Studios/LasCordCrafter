@@ -21,4 +21,4 @@ Forking this repository is fully allowed, and fully promoted.
 Again, do take note of different parts of Licensing.  
   
 Also Note that this bot was made primarily with GunjiCordia in mind, so a lot of stuff is specific to our workflows, ways of going, ways of moderation, etc. and might not be applicable to your situation.  
-If you need any help understanding the source, or if you have any other type of question about the source, feel free to join our Discord server and chat! Most of us who know would be happy to help!
+If you need any help understanding the source, or if you have any other question about the source, feel free to [join our Discord server and chat!](https://discord.gg/kcm8scfCwK) Most of us who know would be happy to help!

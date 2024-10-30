@@ -74,7 +74,7 @@ async def handle_rcon(command, ctx):
             info(f'[{util.time()}] >RCON> Something went wrong connecting to the RCON Client.')
 
 
-# This is for the on_message() event to send the message to the Minecraft Server
+# This is for the on_message() event to send the message to the Minecraft Server.
 async def handle_message(command, channel):
     with mcrcon_client as mcr:
         try:

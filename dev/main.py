@@ -32,7 +32,6 @@ class CordBot(commands.Bot):
         info('------------------------------------------Login-------------------------------------------')
         info(f'Logged in as {self.user} (ID: {self.user.id})')
         info('-----------------------------------------Software-----------------------------------------')
-        # noinspection PyPep8
         info('''   ____              _  ____            __ _                _        __          ___  
   / ___|___  _ __ __| |/ ___|_ __ __ _ / _| |_ ___ _ __    / |      / /_        / _ \ 
  | |   / _ \| '__/ _` | |   | '__/ _` | |_| __/ _ \ '__|   | |     | '_ \      | | | |
@@ -96,7 +95,7 @@ class CordBot(commands.Bot):
         return self
 
 
-async def main():
+async def bot_run():
     logger = logging.getLogger('discord')
     logger.setLevel(logging.DEBUG)
 
@@ -107,7 +106,7 @@ async def main():
     logger.addHandler(handler)
 
     with open(vars.log_dir_path + 'cordcrafter.log', 'w') as file:
-        file.write(f'// Log file init at {util.time}\n\n')
+        file.write(f'// Log file init at {util.time()}\n\n')
 
     async with ClientSession() as our_client:
         # Intents
@@ -122,10 +121,10 @@ async def main():
         async with CordBot(
                 '>>',
                 web_client=our_client,
-                intents=intents,
-        ) as cord_bot:
-            await cord_bot.start(vars.botToken)
+                intents=intents
+        ) as bot:
+            await bot.start(vars.botToken)
 
 
 # For most use cases, after defining what needs to run, we can just tell asyncio to run it:
-asyncio.run(main())
+asyncio.run(bot_run())
