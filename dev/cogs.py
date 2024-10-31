@@ -5,6 +5,7 @@ from typing import Optional, Union
 
 import discord
 import psutil
+from discord import app_commands
 from discord.ext import commands
 
 import bot_events
@@ -47,7 +48,16 @@ class StandaloneCog(commands.Cog):
         else:
             info(f'[{util.time()}] >LOG> Bot Tree Sync Failed: no permission.')
 
-    @commands.hybrid_command(name='ip-joining', description='Tells the person you specify how to join the server.')
+    @commands.command(name='debug-stop')
+    async def exit(self, ctx):
+        tywrap = ctx.guild.get_member(1041430503389155492)
+        if ctx.author == tywrap:
+            info(f'[{util.time()}] >LOG> Bot Stopped by {ctx.author.name}.')
+            await self.bot.close()
+        else:
+            info(f'[{util.time()}] >LOG> Failed to stop bot.')
+
+    @app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
     async def slash_command(self, ctx, member: discord.Member) -> None:
         await ctx.response.send_message(f'''Hey, <@{member.id}>!
 Are you wondering how to join? The server IP alongside the Modpack Link and the Rules are all located in
@@ -58,7 +68,7 @@ And hey, if you're there already, why not read the rules?
 > ~ Sincerely, the entire admin team cuz this question is asked too much. /hj''')
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /ip-joining for {member.name}.')
 
-    @commands.hybrid_command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
+    @app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
     async def slash_command(self, ctx) -> None:
         global latency_val
         latency = round(self.bot.latency * 1000)
@@ -75,7 +85,7 @@ And hey, if you're there already, why not read the rules?
         await ctx.response.send_message(embed=embed)
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /ping -> {latency_val}.')
 
-    @commands.hybrid_command(name="bean", description="Beans the member. Yep. That's all it does.")
+    @app_commands.command(name="bean", description="Beans the member. Yep. That's all it does.")
     async def slash_command(self, ctx, member: discord.Member):
         embed = discord.Embed(title='Member Beaned',
                               description=f'Member: {member.mention},\nResponsible "moderator": {ctx.user.mention}',
@@ -84,7 +94,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /bean for {member.name}.')
 
     # noinspection SpellCheckingInspection
-    @commands.hybrid_command(name='stats', description='Displays the Bot\'s statistics.')
+    @app_commands.command(name='stats', description='Displays the Bot\'s statistics.')
     async def slash_command(self, ctx) -> None:
         # Stats
         global latency_val
@@ -139,7 +149,7 @@ And hey, if you're there already, why not read the rules?
         await ctx.response.send_message(embed=status_embed)
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /stats -> {latency_val}.')
 
-    @commands.hybrid_command(name='resign', description='Resigns the Minecraft member you chose.')
+    @app_commands.command(name='resign', description='Resigns the Minecraft member you chose.')
     async def slash_command(self, ctx, admin: discord.Member):
         tywrap = ctx.guild.get_member(1041430503389155492)
         old_role = ctx.guild.get_role(vars.minecraftAdmin)
@@ -167,7 +177,7 @@ And hey, if you're there already, why not read the rules?
             await ctx.response.send_message('You do not have the permission to send this command.', ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /resign for {admin.name}.')
 
-    @commands.hybrid_command(name='say', description='Says stuff as the bot')
+    @app_commands.command(name='say', description='Says stuff as the bot')
     @discord.app_commands.checks.has_permissions(administrator=True)
     async def slash_command(self, ctx, text: str, reference: Optional[str]):
         if reference is not None:
@@ -181,7 +191,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {text}.')
 
     # noinspection SpellCheckingInspection
-    @commands.hybrid_command(name='credits', description='Displays Credits for the bot.')
+    @app_commands.command(name='credits', description='Displays Credits for the bot.')
     async def slash_command(self, ctx):
         description = f'''<:resources:1278835693900136532> **Coding:**
 <:arrow_under:1278834153655107646> Tiazzz -- On [GitHub](<https://github.com/TywrapStudios>)
@@ -226,7 +236,7 @@ class AppealServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
+    @app_commands.command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
     @discord.app_commands.checks.has_permissions(administrator=True)
     async def slash_command(self, ctx, channel: discord.TextChannel):
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
@@ -237,7 +247,7 @@ class AppealServiceCog(commands.Cog):
             content=f'Setup Completed in {channel.mention}.\nMake sure to delete any leftovers.', ephemeral=True)
         info(f'[{util.time()}] >LOG> Setup Completed in #{channel.name} by {ctx.author.name}.')
 
-    @commands.hybrid_command(name='appeal', description='Manually appeals a Minecraft Ban Appeal ticket.')
+    @app_commands.command(name='appeal', description='Manually appeals a Minecraft Ban Appeal ticket.')
     async def slash_command(self, ctx):
         view = views.ManualAppealButton()
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
@@ -245,7 +255,7 @@ class AppealServiceCog(commands.Cog):
         await ctx.response.send_message(view=view, embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.author.name} ran /appeal.')
 
-    @commands.hybrid_command(name='add', description='Adds a user to the current ticket.')
+    @app_commands.command(name='add', description='Adds a user to the current ticket.')
     async def slash_command(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
             await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
@@ -265,7 +275,7 @@ class AppealServiceCog(commands.Cog):
                 if member == ctx.user:
                     await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
-    @commands.hybrid_command(name='remove', description='Removes a user from the current ticket.')
+    @app_commands.command(name='remove', description='Removes a user from the current ticket.')
     async def slash_command(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
             await ctx.channel.set_permissions(member, overwrite=None)
@@ -281,7 +291,7 @@ class AppealServiceCog(commands.Cog):
                 if member == ctx.user:
                     await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
-    @commands.hybrid_command(name='close', description='Closes the ticket.')
+    @app_commands.command(name='close', description='Closes the ticket.')
     async def slash_command(self, ctx):
         embed = discord.Embed(title='Confirm',
                               description='Please confirm that you want to close your Ban Appeal Ticket.',
@@ -290,7 +300,7 @@ class AppealServiceCog(commands.Cog):
         await ctx.response.send_message(embed=embed, view=view, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.author.name} closed {ctx.channel.name}.')
 
-    @commands.hybrid_command(name='forceclose', description='Forcefully closes the selected ticket.')
+    @app_commands.command(name='forceclose', description='Forcefully closes the selected ticket.')
     async def slash_command(self, ctx, ticket: discord.TextChannel):
         allowedrole1 = ctx.guild.get_role(vars.discordAdmin)
         allowedrole2 = ctx.guild.get_role(vars.minecraftAdmin)
@@ -326,15 +336,8 @@ class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # TODO>GOAL[2]: This currently does not work, Cogs don't seem to allow for Context Menus
-    # @bot.tree.context_menu(name='Sanitize & Dehoist')
-    # @discord.app_commands.checks.has_permissions(manage_nicknames=True)
-    # async def context(self, ctx, member: discord.Member):
-    #     await util.sanitize(ctx, member)
-    #     info(f'[{util.time()}] >LOG> {ctx.author.name} sanitized {member.name} using CM.]')
-
-    @commands.hybrid_command(name='sanitize',
-                             description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
+    @app_commands.command(name='sanitize',
+                          description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     async def context(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
@@ -345,23 +348,7 @@ class ClaimCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_group(name='claims', description='Root for the Claim notes commands.')
-    async def claim(self, ctx, mention: Optional[discord.Member]):
-        if mention is None:
-            mention_text = ''
-        else:
-            mention_text = mention.mention
-        description = '''The mod we use for the claiming system is Open Parties and Claims.
-Xaero's Mini- and World map have also been added to make that experience even nicer!
-
-> <:curseforge:1279105910945480797> [CurseForge Page](<https://www.curseforge.com/minecraft/mc-mods/open-parties-and-claims>)
-> <:modrinth:1279105929421258872> [Modrinth Page](<https://modrinth.com/mod/open-parties-and-claims>)
-> <:githubblack:1279105948908130404> [GitHub repo](<https://github.com/thexaero/open-parties-and-claims>)
-'''
-        embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title='<:claim:1278815499349786704> Open Parties and Claims:', description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.author.name} sent /claims for {mention.name}.')
+    claim = app_commands.Group(name='claims', description='Info about the claim system.')
 
     @claim.command(name='claiming', description='How to claim a piece of land.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -508,18 +495,7 @@ class NotesCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_group(name='notes', description='Root for the Notes commands.')
-    async def notes(self, ctx, mention: Optional[discord.Member]):
-        if mention is None:
-            mention_text = ''
-        else:
-            mention_text = mention.mention
-        description = '''> The `/notes` Command Group provides nice-to-know notes that aren't directly relevant, but still nice to have.
-They provide a way to quickly explain subjects that would otherwise be hard to explain yourself, or if you're in a hurry.'''
-        embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title='<:info:1278823933717512232> Info:', description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.author.name} sent /notes for {mention.name}.')
+    notes = app_commands.Group(name='notes', description='Notes about random stuff.')
 
     @notes.command(name='cracked', description='Explains the fuzz about Cracked accounts.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -676,14 +652,7 @@ class CmdCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_group(name='cmd', description='Root for the Cmd commands.')
-    async def cmd(self, ctx):
-        description = '''> The `/cmd` Command Group is way to send commands directly to the Minecraft server utilizing RCON.
-They provide a way to quickly send preset ones, or you can send your own ones using `/cmd run`.'''
-        embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title='<:info:1278823933717512232> Info:', description=description)
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.author.name} sent /cmd.')
+    cmd = app_commands.Group(name='cmd', description='Send commands to the Minecraft server.')
 
     @cmd.command(name='tellraw', description='Says something in the MC Server.')
     async def sub_command(self, ctx, content: str) -> None:
@@ -871,20 +840,13 @@ class StatusCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_group(name='status', description='Root for the Status commands.')
-    async def status(self, ctx):
-        description = f'''> The `/status` Command Group is way to send professional looking Embeds that give info about the server's status.
-They provide a way to quickly send preset ones, if you have a suggestion for an embed feel free to make a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) about it!'''
-        embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title='<:info:1278823933717512232> Info:', description=description)
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.author.name} ran /status.')
+    status = app_commands.Group(name='status', description='Commands to send pregen embeds about stati.')
 
     @status.command(name='downtime', description='Pregen a Downtime Embed, should be used when the server is down.')
     async def sub_command(self, ctx, title: str, summary: Optional[str], impact: Optional[str],
                           channel: Optional[discord.TextChannel], ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}; DOWN'
-        if util.check_for_roles_status(ctx):
+        if await util.check_for_roles_status(ctx):
             await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                 status=discord.Status.online)
@@ -895,7 +857,9 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
             if impact is None:
                 impact = 'No impact.'
             if ping is None:
-                ping = ''
+                ping = ' '
+            else:
+                ping = ping.mention
             description = f"""**Summary:**
 {summary}
 
@@ -905,7 +869,7 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
                                   colour=discord.Colour.from_str('#fd5151'), timestamp=datetime.now())
             embed.set_footer(text='CordCraft',
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping.mention)
+            message = await channel.send(embed=embed, content=ping)
             view = views.DeleteEmbed(message=message)
             await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
@@ -918,7 +882,7 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
     async def sub_command(self, ctx, title: str, summary: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}'
-        if util.check_for_roles_status(ctx):
+        if await util.check_for_roles_status(ctx):
             await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                 status=discord.Status.online)
@@ -927,14 +891,16 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
             if summary is None:
                 summary = 'No summary was provided.'
             if ping is None:
-                ping = ''
+                ping = ' '
+            else:
+                ping = ping.mention
             description = f"""**Summary:**
 {summary}"""
             embed = discord.Embed(title=f'Downtime Update - {title}', description=description,
                                   colour=discord.Colour.from_str('#e2a915'), timestamp=datetime.now())
             embed.set_footer(text='CordCraft',
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping.mention)
+            message = await channel.send(embed=embed, content=ping)
             view = views.DeleteEmbed(message=message)
             await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
@@ -946,21 +912,23 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
                     description='Pregen a Downtime Update Embed, that\'s specifically for the service being back up.')
     async def sub_command(self, ctx, title: str, note: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
-        if util.check_for_roles_status(ctx):
+        if await util.check_for_roles_status(ctx):
             await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'), status=discord.Status.online)
             if channel is None:
                 channel = ctx.channel
             if note is None:
                 note = 'No extra note was provided.'
             if ping is None:
-                ping = ''
+                ping = ' '
+            else:
+                ping = ping.mention
             description = f"""**Extra note:**
 {note}"""
             embed = discord.Embed(title=f'Downtime Update - {title}', description=description,
                                   colour=discord.Colour.from_str('#2dc79c'), timestamp=datetime.now())
             embed.set_footer(text='CordCraft',
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping.mention)
+            message = await channel.send(embed=embed, content=ping)
             view = views.DeleteEmbed(message=message)
             await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
@@ -969,20 +937,22 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
             await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
 
     @status.command(name='notice',
-                    description='Pregen a Notice Embed, which is just a simple way to point something out that does not have big impact.')
+                    description='Pregen a Notice Embed.')
     async def sub_command(self, ctx, note: str, channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
-        if util.check_for_roles_status(ctx):
+        if await util.check_for_roles_status(ctx):
             if channel is None:
                 channel = ctx.channel
             if ping is None:
-                ping = ''
+                ping = ' '
+            else:
+                ping = ping.mention
             description = f"""{note}"""
             embed = discord.Embed(title=f'Notice:', description=description, colour=discord.Colour.dark_gold(),
                                   timestamp=datetime.now())
             embed.set_footer(text='CordCraft',
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping.mention)
+            message = await channel.send(embed=embed, content=ping)
             view = views.DeleteEmbed(message=message)
             await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
@@ -996,7 +966,7 @@ They provide a way to quickly send preset ones, if you have a suggestion for an 
             status = f'{status}; DOWN'
         else:
             status = status
-        if util.check_for_roles_status(ctx):
+        if await util.check_for_roles_status(ctx):
             if reset is False:
                 await self.bot.change_presence(
                     activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
@@ -1016,15 +986,7 @@ class ThreadCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.hybrid_group(name='thread', description='Root for the Thread commands.')
-    async def thread(self, ctx):
-        description = f'''> The `/thread` Command Group is way for (non-)moderators to modify their threads.
-They provide a way to quickly e.g. pin or unpin messages and to lock or unlock the thread.
-Obviously given you own the thread or if you would have been able to modify it either way (e.g. due to moderation permissions).'''
-        embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title='<:info:1278823933717512232> Info:', description=description)
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.author.name} ran /thread.]')
+    thread = app_commands.Group(name='thread', description='Commands for managing your thread.')
 
     @thread.command(name='pin', description='Pin or unpin a message in your thread, given you have permission.')
     async def sub_command(self, ctx, message_id: str):
@@ -1109,14 +1071,7 @@ class ModCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_group(name='moderation', description='Root for the Moderation commands.')
-    async def moderation(self, ctx):
-        description = f'''> The `/moderation` Command Group is a group of commands related to Discord server moderation.
-They provide a way to quickly e.g. ban/unban people, or to lock/unlock a channel.'''
-        embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title='<:info:1278823933717512232> Info:', description=description)
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.author.name} ran /moderation.]')
+    moderation = app_commands.Group(name='moderation', description='Moderation commands.')
 
     @moderation.command(name='ban', description='Bans a user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
@@ -1139,7 +1094,7 @@ If you think this ban was not rightful, or an actual accident feel free to conta
 This ban will not be removed automatically. That feature is sadly not implemented into this bot yet. If the time is over and you have not been unbanned yet. Please contact a moderator.
 I wish you a great day further!''')
         await offender.ban(reason=reason_for_audit, delete_message_days=del_days)
-        embed = discord.Embed(description=f'{offender.mention} was banned from the server. <:red:1249075916907348068>',
+        embed = discord.Embed(description=f'{offender.mention} was banned from the server. <:red:1301608135370473532>',
                               colour=discord.Colour.red())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
 
@@ -1150,7 +1105,7 @@ I wish you a great day further!''')
         reason = f'{ctx.user.mention}: {reason}.'
         await ctx.guild.unban(offender, reason=reason)
         embed = discord.Embed(colour=discord.Colour.green(),
-                              description=f'{offender.mention} was unbanned from the server. <:green:1249075836196360204>')
+                              description=f'{offender.mention} was unbanned from the server. <:green:1301608134011256852>')
         await ctx.response.send_message(embed=embed, ephemeral=silent)
 
     @moderation.command(name='kick', description='Kicks a user.')
@@ -1166,7 +1121,7 @@ The moderator responsible for your kick was {ctx.user.mention}.
 If you wish to join back, here is the Discord Invite Link: {vars.guildInviteLink}
 I wish you a great day further!''')
         await offender.kick(reason=reason_for_audit)
-        embed = discord.Embed(description=f'{offender.mention} was kicked from the server. <:red:1249075916907348068>',
+        embed = discord.Embed(description=f'{offender.mention} was kicked from the server. <:red:1301608135370473532>',
                               colour=discord.Colour.red())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
 
@@ -1199,7 +1154,7 @@ I wish you a great day further!''')
 
         if 's' == dur_str and not invalid and not handled:
             embed = discord.Embed(
-                description=f'{offender.mention} was timed out for {dur_int} second(s). <:blue:1249075855204810762>',
+                description=f'{offender.mention} was timed out for {dur_int} second(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(seconds=dur_int), reason=reason)
             await ctx.response.send_message(embed=embed, ephemeral=silent)
@@ -1207,7 +1162,7 @@ I wish you a great day further!''')
             handled = True
         if 'm' == dur_str and not invalid and not handled:
             embed = discord.Embed(
-                description=f'{offender.mention} was timed out for {dur_int} minutes(s). <:blue:1249075855204810762>',
+                description=f'{offender.mention} was timed out for {dur_int} minutes(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(minutes=dur_int), reason=reason)
             await ctx.response.send_message(embed=embed, ephemeral=silent)
@@ -1215,7 +1170,7 @@ I wish you a great day further!''')
             handled = True
         if 'h' == dur_str and not invalid and not handled:
             embed = discord.Embed(
-                description=f'{offender.mention} was timed out for {dur_int} hours(s). <:blue:1249075855204810762>',
+                description=f'{offender.mention} was timed out for {dur_int} hours(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(hours=dur_int), reason=reason)
             await ctx.response.send_message(embed=embed, ephemeral=silent)
@@ -1223,7 +1178,7 @@ I wish you a great day further!''')
             handled = True
         if 'd' == dur_str and not invalid and not handled:
             embed = discord.Embed(
-                description=f'{offender.mention} was timed out for {dur_int} days(s). <:blue:1249075855204810762>',
+                description=f'{offender.mention} was timed out for {dur_int} days(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(days=dur_int), reason=reason)
             await ctx.response.send_message(embed=embed, ephemeral=silent)
@@ -1231,7 +1186,7 @@ I wish you a great day further!''')
             handled = True
         if 'w' == dur_str and not invalid and not handled:
             embed = discord.Embed(
-                description=f'{offender.mention} was timed out for {dur_int} week(s). <:blue:1249075855204810762>',
+                description=f'{offender.mention} was timed out for {dur_int} week(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(weeks=dur_int), reason=reason)
             await ctx.response.send_message(embed=embed, ephemeral=silent)

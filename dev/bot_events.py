@@ -7,11 +7,15 @@ from discord.ext import commands
 import rcon
 import util
 import vars
+import tasks
 from util import info
 
 
 # On Ready:
 async def on_ready(bot: commands.Bot) -> None:
+    info(f'[{util.time()}] >LOG> Starting post_bump task. . .')
+    tasks.TaskCog.post_bump.start()
+    info(f'[{util.time()}] >LOG> Started post_bump task.')
     info(f'[{util.time()}] >LOG> Setting Discord Bot Status. . .')
     await bot.change_presence(activity=discord.Game('on CordCraft Season 2.'), status=discord.Status.online)
     info(f'[{util.time()}] >LOG> Discord Bot Status Set.')
@@ -59,7 +63,7 @@ Report any issues to the [GitHub Issue Tracker](<https://github.com/Tywrap-Studi
 
 
 async def on_message(message: discord.Message, bot: commands.Bot) -> None:
-    if not message.content.startswith('$'):
+    if not message.content.startswith('>>'):
         name = message.author.display_name
         id = f'{message.author.id}'
         text = message.content

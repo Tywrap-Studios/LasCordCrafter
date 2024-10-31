@@ -13,7 +13,7 @@ class ConfirmButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Confirm', style=discord.ButtonStyle.green, emoji='✅')
-    async def onclick(self, ctx: discord.Interaction):
+    async def onclick(self, ctx, button: discord.ui.Button):
         ticket_log_channel = ctx.guild.get_channel(vars.ticketLog)
         mc_admin_role = ctx.guild.get_role(vars.minecraftAdmin)
         if mc_admin_role in ctx.user.roles:
@@ -44,7 +44,7 @@ class CloseTicketButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Close', style=discord.ButtonStyle.danger, emoji='🔒')
-    async def onclick(self, ctx):
+    async def onclick(self, ctx, button: discord.ui.Button):
         embed = discord.Embed(title='Confirm',
                               description='Please confirm that you want to close your Ban Appeal Ticket.',
                               colour=discord.Colour.green())
@@ -57,7 +57,7 @@ class ManualAppealButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Open MC Ban Appeal', style=discord.ButtonStyle.blurple, emoji='📫')
-    async def onclick(self, ctx):
+    async def onclick(self, ctx, button: discord.ui.Button):
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
             ctx.user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True,
@@ -94,7 +94,7 @@ class RemoveButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Remove User.', style=discord.ButtonStyle.danger)
-    async def onclick(self, ctx):
+    async def onclick(self, ctx, button: discord.ui.Button):
         if "ban-appeal-" in ctx.channel.name:
             member = self.member
             await ctx.channel.set_permissions(member, overwrite=None)
@@ -117,7 +117,7 @@ class ShowDebugButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Show Debug util.info', style=discord.ButtonStyle.gray, emoji='☑️')
-    async def onclick(self, ctx):
+    async def onclick(self, ctx, button: discord.ui.Button):
         attempted_nick = self.nick
         embed = discord.Embed(colour=discord.Colour.dark_embed(), title='__Debug util.info__', description=f'''
 ```
@@ -150,7 +150,7 @@ class DeleteEmbed(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Delete Embed', style=discord.ButtonStyle.danger, emoji='🗑️')
-    async def onclick(self, ctx):
+    async def onclick(self, ctx, button: discord.ui.Button):
         message = self.message
         await message.delete()
         await ctx.response.send_message('Message Deleted.', ephemeral=True)
@@ -169,7 +169,7 @@ class ConfirmDeleteThreadButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Confirm Deletion.', style=discord.ButtonStyle.danger)
-    async def onclick(self):
+    async def onclick(self, button: discord.ui.Button):
         thread = self.thread
         ctx = self.ctx
         await thread.delete()

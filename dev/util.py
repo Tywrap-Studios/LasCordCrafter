@@ -20,7 +20,7 @@ async def send_webhook(url: str, content: str, title: str) -> None:
     info(f'[{time()}] >LOG> aiohttp client session used for Webhook.')
 
 
-async def check_for_roles_status(ctx: discord.Interaction):
+async def check_for_roles_status(ctx: discord.Interaction) -> bool:
     allowed1 = ctx.guild.get_role(vars.discordAdmin) in ctx.user.roles
     allowed2 = ctx.guild.get_role(vars.minecraftAdmin) in ctx.user.roles
     allowed3 = ctx.guild.get_role(vars.centralHosting) in ctx.user.roles

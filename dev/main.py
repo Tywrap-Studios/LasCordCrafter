@@ -38,9 +38,6 @@ class CordBot(commands.Bot):
  | |__| (_) | | | (_| | |___| | | (_| |  _| ||  __/ |      | |  _  | (_) |  _  | |_| |
   \____\___/|_|  \__,_|\____|_|  \__,_|_|  \__\___|_|      |_| (_)  \___/  (_)  \___/ ''')
         info('-------------------------------------------Init-------------------------------------------')
-        info(f'Starting Tasks. . .')
-        tasks.task_loop.start()
-        info(f'Tasks Started.')
         info('Starting Uptime Timer. . .')
         self._start_time = time.time()
         info('Timer Started.')
@@ -54,6 +51,8 @@ class CordBot(commands.Bot):
         await self.add_cog(cogs.SanitizeServiceCog(self))
         await self.add_cog(cogs.StandaloneCog(self, self._start_time))
         await self.add_cog(cogs.EventCog(self))
+        await self.add_cog(cogs.ModCog(self))
+        await self.add_cog(tasks.TaskCog(self))
         info('Cogs Registered.')
         info('Syncing Bot Tree. . .')
         await self.tree.sync()
@@ -88,7 +87,7 @@ class CordBot(commands.Bot):
     def get_start_time(self):
         return self._start_time
 
-    def get_bot(self):
+    def get(self):
         return self
 
 
@@ -105,7 +104,7 @@ async def bot_run():
     with open(vars.log_dir_path + 'cordcrafter.log', 'w') as file:
         file.write(f'// Log file init at {util.time()}\n\n')
 
-    async with ClientSession() as our_client:
+    async with ClientSession() as client:
         # Intents
         intents = discord.Intents.default()
         intents.members = True
@@ -117,7 +116,7 @@ async def bot_run():
         intents.message_content = True
         async with CordBot(
                 '>>',
-                web_client=our_client,
+                web_client=client,
                 intents=intents
         ) as bot:
             await bot.start(vars.botToken)
