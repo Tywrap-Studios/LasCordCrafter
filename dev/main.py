@@ -37,6 +37,9 @@ class CordBot(commands.Bot):
  | |   / _ \| '__/ _` | |   | '__/ _` | |_| __/ _ \ '__|   | |     | '_ \      | | | |
  | |__| (_) | | | (_| | |___| | | (_| |  _| ||  __/ |      | |  _  | (_) |  _  | |_| |
   \____\___/|_|  \__,_|\____|_|  \__,_|_|  \__\___|_|      |_| (_)  \___/  (_)  \___/ ''')
+        info('-------------------------------------------WARN-------------------------------------------')
+        info('Note that this version is a [BETA] version of the software. Use at your own risk!')
+        info('Some features may not work as intended.')
         info('-------------------------------------------Init-------------------------------------------')
         info('Starting Uptime Timer. . .')
         self._start_time = time.time()

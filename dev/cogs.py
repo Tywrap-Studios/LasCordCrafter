@@ -1032,17 +1032,13 @@ class ThreadCog(commands.Cog):
         else:
             embed = discord.Embed(title='Warning:', colour=discord.Colour.brand_red(),
                                   description=f'You are about to fully delete {thread.mention}, are you sure?\nNote that this action is IRREVERSIBLE!')
-            view = views.ConfirmDeleteThreadButton(thread=thread, ctx=ctx)
+            view = views.ConfirmDeleteThreadButton(thread=thread)
             await ctx.response.send_message(embed=embed, view=view)
 
     @thread.command(name='info', description='Displays info about the Thread.')
     async def sub_command(self, ctx, thread: Optional[discord.Thread]):
         if thread is None:
             thread = ctx.channel
-
-        tags = thread.applied_tags
-        if tags.count == 0:
-            tags = 'This thread has no tags.'
 
         last_message = thread.last_message
         if last_message is None:
@@ -1054,7 +1050,6 @@ class ThreadCog(commands.Cog):
             jump_to_top = f'\n-# [Jump to top]({starter_message.jump_url})'
 
         description = f'''<:party_owner:1278830882828062802> Owner: {thread.owner.mention}
-<:search:1279151128466165911> Tags: {tags}
 <:config:1278820765797580921> Locked: {thread.locked}
 <:id:1279190510027800709> Thread Type: {thread.type}
 <:asterix:1279190506777088000> Stats:

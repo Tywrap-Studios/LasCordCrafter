@@ -161,16 +161,13 @@ class ConfirmDeleteThreadButton(discord.ui.View):
     def __init__(
             self,
             *,
-            thread: discord.Thread,
-            ctx: commands.Context
+            thread: discord.Thread
     ):
         self.thread: discord.Thread = thread
-        self.ctx: commands.Context = ctx
         super().__init__(timeout=None)
 
     @discord.ui.button(label='Confirm Deletion.', style=discord.ButtonStyle.danger)
-    async def onclick(self, button: discord.ui.Button):
+    async def onclick(self, ctx, button: discord.ui.Button):
         thread = self.thread
-        ctx = self.ctx
         await thread.delete()
         util.info(f'[{util.time()}] >LOG> {ctx.author.name} deleted their thread.')
