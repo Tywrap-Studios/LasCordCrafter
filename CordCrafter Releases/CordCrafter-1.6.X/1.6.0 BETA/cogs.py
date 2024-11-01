@@ -72,7 +72,7 @@ class StandaloneCog(commands.Cog):
                     continue
         info(f'[{util.time()}] >LOG> {ctx.author.name} Attempted to flush database.')
 
-    @app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
+    @commands.hybrid_command(name='ip-joining', description='Tells the person you specify how to join the server.')
     async def slash_command(self, ctx, member: discord.Member) -> None:
         await ctx.response.send_message(f'''Hey, <@{member.id}>!
 Are you wondering how to join? The server IP alongside the Modpack Link and the Rules are all located in
@@ -83,7 +83,7 @@ And hey, if you're there already, why not read the rules?
 > ~ Sincerely, the entire admin team cuz this question is asked too much. /hj''')
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ip-joining for {member.name}.')
 
-    @app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
+    @commands.hybrid_command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
     async def slash_command(self, ctx) -> None:
         global latency_val
         latency = round(self.bot.latency * 1000)
@@ -100,7 +100,7 @@ And hey, if you're there already, why not read the rules?
         await ctx.response.send_message(embed=embed)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ping -> {latency_val}.')
 
-    @app_commands.command(name="bean", description="Beans the member. Yep. That's all it does.")
+    @commands.hybrid_command(name="bean", description="Beans the member. Yep. That's all it does.")
     async def slash_command(self, ctx, member: discord.Member):
         embed = discord.Embed(title='Member Beaned',
                               description=f'Member: {member.mention},\nResponsible "moderator": {ctx.user.mention}',
@@ -109,7 +109,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /bean for {member.name}.')
 
     # noinspection SpellCheckingInspection
-    @app_commands.command(name='stats', description='Displays the Bot\'s statistics.')
+    @commands.hybrid_command(name='stats', description='Displays the Bot\'s statistics.')
     async def slash_command(self, ctx) -> None:
         # Stats
         global latency_val
@@ -164,7 +164,7 @@ And hey, if you're there already, why not read the rules?
         await ctx.response.send_message(embed=status_embed)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /stats -> {latency_val}.')
 
-    @app_commands.command(name='resign', description='Resigns the Minecraft member you chose.')
+    @commands.hybrid_command(name='resign', description='Resigns the Minecraft admin you chose.')
     async def slash_command(self, ctx, admin: discord.Member):
         tywrap = ctx.guild.get_member(1041430503389155492)
         old_role = ctx.guild.get_role(vars.minecraftAdmin)
@@ -192,7 +192,7 @@ And hey, if you're there already, why not read the rules?
             await ctx.response.send_message('You do not have the permission to send this command.', ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /resign for {admin.name}.')
 
-    @app_commands.command(name='say', description='Says stuff as the bot')
+    @commands.hybrid_command(name='say', description='Says stuff as the bot')
     @discord.app_commands.checks.has_permissions(administrator=True)
     async def slash_command(self, ctx, text: str, reference: Optional[str]):
         if reference is not None:
@@ -206,7 +206,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {text}.')
 
     # noinspection SpellCheckingInspection
-    @app_commands.command(name='credits', description='Displays Credits for the bot.')
+    @commands.hybrid_command(name='credits', description='Displays Credits for the bot.')
     async def slash_command(self, ctx):
         description = f'''<:resources:1278835693900136532> **Coding:**
 <:arrow_under:1278834153655107646> Tiazzz -- On [GitHub](<https://github.com/TywrapStudios>)
@@ -225,21 +225,18 @@ And hey, if you're there already, why not read the rules?
 
 <:config:1278820765797580921> **Libraries Used:**
 <:arrow_under:1278834153655107646> discord.py
-<:arrow_under:1278834153655107646> datetime
 <:arrow_under:1278834153655107646> psutil
 <:arrow_under:1278834153655107646> decancer_py
 <:arrow_under:1278834153655107646> dotenv
-<:arrow_under:1278834153655107646> typing
 <:arrow_under:1278834153655107646> aiohttp
 <:arrow_under:1278834153655107646> mcrcon
-<:arrow_under:1278834153655107646> logging
 
 <:search:1279151128466165911> **Extra:**
 <:arrow_under:1278834153655107646> <:githubblack:1279105948908130404> The Tywrap Studios Org on [GitHub](<https://github.com/orgs/Tywrap-Studios/repositories>)
 <:arrow_under:1278834153655107646> <:githubblack:1279105948908130404> The project on [GitHub](<https://github.com/Tywrap-Studios/LasCordCrafter>)
 <:arrow_under:1278834153655107646> <:mail:1279219863654629426> Want to get in contact and contribute? info.tywrap.studio@gmail.com
 
--# MIT; Copyright 2024 Tywrap Studios. -- info.tywrap.studio@gmail.com -- {vars.botVersion}
+-# MIT; Copyright (c) 2024 Tywrap Studios. -- info.tywrap.studio@gmail.com -- {vars.botVersion}
     '''
         embed = discord.Embed(colour=discord.Colour.teal(), title='<:list:1279213268082229381> Credits:',
                               description=description)
@@ -251,7 +248,7 @@ class AppealServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
+    @commands.hybrid_command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
     @discord.app_commands.checks.has_permissions(administrator=True)
     async def slash_command(self, ctx, channel: discord.TextChannel):
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
@@ -262,7 +259,7 @@ class AppealServiceCog(commands.Cog):
             content=f'Setup Completed in {channel.mention}.\nMake sure to delete any leftovers.', ephemeral=True)
         info(f'[{util.time()}] >LOG> Setup Completed in #{channel.name} by {ctx.user.name}.')
 
-    @app_commands.command(name='appeal', description='Manually appeals a Minecraft Ban Appeal ticket.')
+    @commands.hybrid_command(name='appeal', description='Manually appeals a Minecraft Ban Appeal ticket.')
     async def slash_command(self, ctx):
         view = views.ManualAppealButton()
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
@@ -270,7 +267,7 @@ class AppealServiceCog(commands.Cog):
         await ctx.response.send_message(view=view, embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /appeal.')
 
-    @app_commands.command(name='add', description='Adds a user to the current ticket.')
+    @commands.hybrid_command(name='add', description='Adds a user to the current ticket.')
     async def slash_command(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
             await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
@@ -290,7 +287,7 @@ class AppealServiceCog(commands.Cog):
                 if member == ctx.user:
                     await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
-    @app_commands.command(name='remove', description='Removes a user from the current ticket.')
+    @commands.hybrid_command(name='remove', description='Removes a user from the current ticket.')
     async def slash_command(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
             await ctx.channel.set_permissions(member, overwrite=None)
@@ -306,7 +303,7 @@ class AppealServiceCog(commands.Cog):
                 if member == ctx.user:
                     await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
-    @app_commands.command(name='close', description='Closes the ticket.')
+    @commands.hybrid_command(name='close', description='Closes the ticket.')
     async def slash_command(self, ctx):
         embed = discord.Embed(title='Confirm',
                               description='Please confirm that you want to close your Ban Appeal Ticket.',
@@ -315,7 +312,7 @@ class AppealServiceCog(commands.Cog):
         await ctx.response.send_message(embed=embed, view=view, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.user.name} closed {ctx.channel.name}.')
 
-    @app_commands.command(name='forceclose', description='Forcefully closes the selected ticket.')
+    @commands.hybrid_command(name='forceclose', description='Forcefully closes the selected ticket.')
     async def slash_command(self, ctx, ticket: discord.TextChannel):
         allowedrole1 = ctx.guild.get_role(vars.discordAdmin)
         allowedrole2 = ctx.guild.get_role(vars.minecraftAdmin)
