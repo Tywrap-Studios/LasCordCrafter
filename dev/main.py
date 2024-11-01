@@ -1,13 +1,15 @@
 import asyncio
 import logging
 import time
+from datetime import datetime
 from typing import Optional
 
 import discord
 from aiohttp import ClientSession
 from discord.ext import commands
+from discord.ext import tasks as discord_tasks
 
-import tasks
+import database
 import vars
 import cogs
 import util
@@ -44,6 +46,10 @@ class CordBot(commands.Bot):
         info('Starting Uptime Timer. . .')
         self._start_time = time.time()
         info('Timer Started.')
+        info('Starting Background Tasks. . .')
+        self.post_bump.start()
+        self.check_temp_bans.start()
+        info('Background Tasks Started.')
         info('Registering Cogs. . .')
         await self.add_cog(cogs.CmdCog(self))
         await self.add_cog(cogs.ClaimCog(self))
@@ -55,11 +61,15 @@ class CordBot(commands.Bot):
         await self.add_cog(cogs.StandaloneCog(self, self._start_time))
         await self.add_cog(cogs.EventCog(self))
         await self.add_cog(cogs.ModCog(self))
-        await self.add_cog(tasks.TaskCog(self))
         info('Cogs Registered.')
         info('Syncing Bot Tree. . .')
         await self.tree.sync()
         info('Bot Tree Synced.')
+        info('-----------------------------------------Database-----------------------------------------')
+        info('INFO: Utilizing sqlite3.')
+        info('Initializing Database(s). . .')
+        database.init_db()
+        info('Database(s) Initialized.')
         info('-----------------------------------------Intents------------------------------------------')
         info('''Intents set:
     [X] intents.auto_moderation
@@ -92,6 +102,35 @@ class CordBot(commands.Bot):
 
     def get(self):
         return self
+
+    @discord_tasks.loop(hours=4)
+    async def post_bump(self):
+        forum = self.get_channel(vars.team_forum)
+        forum_posts = forum.threads
+        trusted_tag = forum.get_tag(vars.trusted_team_tag_id)
+        for post in forum_posts:
+            if trusted_tag in post.applied_tags:
+                msg = await post.send(content='Auto-Bump.')
+                await msg.delete()
+        info(f'[{util.time()}] >LOG> #{forum.name} posts bumped.')
+
+    @discord_tasks.loop(minutes=1)
+    async def check_temp_bans(self):
+        active_bans = database.get_active_bans()
+        current_time = datetime.now()
+
+        for ban in active_bans:
+            user_id, guild_id, unban_time, reason = ban
+            unban_datetime = datetime.fromisoformat(unban_time)
+
+            if current_time >= unban_datetime:
+                guild = self.get_guild(guild_id)
+                try:
+                    await guild.unban(discord.Object(id=user_id), reason="Temporary ban expired")
+                    database.remove_temp_ban(user_id)
+                except discord.HTTPException:
+                    info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
+                    continue
 
 
 async def bot_run():

@@ -79,6 +79,8 @@ def format_duration(text: str) -> str:
     text = text.replace("day", "d")
     text = text.replace("weeks", "w")
     text = text.replace("week", "w")
+    text = text.replace("months", "M")
+    text = text.replace("month", "M")
     text = text.replace(" ", "")
     return text
 
@@ -102,6 +104,8 @@ def get_duration_in_days(duration_str: str, duration_int: int) -> float:
         return duration_int
     if duration_str == 'w':
         return duration_int * 7
+    if duration_str == 'M':
+        return duration_int * 30  # Approximate month length
     return 1
 
 

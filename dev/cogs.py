@@ -12,6 +12,7 @@ import bot_events
 import util
 import vars
 import views
+import database
 from rcon import send_rcon
 from util import info
 
@@ -335,6 +336,8 @@ class AppealServiceCog(commands.Cog):
 class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    # TODO>WIP[4]: Make a Context Menu work for this Cog.
 
     @app_commands.command(name='sanitize',
                           description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
@@ -1079,28 +1082,43 @@ class ModCog(commands.Cog):
             del_days = 7
         else:
             del_days = 0
+
+        if time.lower() != 'infinite':
+            dur = util.format_duration(time)
+            dur_int = util.from_formatted_get_int(dur)
+            dur_str = util.from_formatted_get_str(dur)
+
+            unban_time = datetime.now()
+            if dur_str == 's':
+                unban_time = unban_time + timedelta(seconds=dur_int)
+            elif dur_str == 'm':
+                unban_time = unban_time + timedelta(minutes=dur_int)
+            elif dur_str == 'h':
+                unban_time = unban_time + timedelta(hours=dur_int)
+            elif dur_str == 'd':
+                unban_time = unban_time + timedelta(days=dur_int)
+            elif dur_str == 'w':
+                unban_time = unban_time + timedelta(weeks=dur_int)
+            elif dur_str == 'M':
+                unban_time = unban_time + timedelta(days=dur_int * 30)  # Approximate month length
+
+            database.add_temp_ban(offender.id, ctx.guild.id, unban_time.isoformat(), reason)
+            time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M:%S')}"
+        else:
+            time_str = "indefinitely"
+
         await offender_dm.send(content=f'''Hi. Unfortunately I am here to inform you that you have been banned from GunjiCordia.
 The reason for your ban was: **{reason}**.
-The length of your ban is: **{time} day(s)**.
+You are banned {time_str}.
 The moderator responsible for your ban was {ctx.user.mention}.
 
 If you think this ban was not rightful, or an actual accident feel free to contact said, or a different moderator.
-
-This ban will not be removed automatically. That feature is sadly not implemented into this bot yet. If the time is over and you have not been unbanned yet. Please contact a moderator.
 I wish you a great day further!''')
-        await offender.ban(reason=reason_for_audit, delete_message_days=del_days)
-        embed = discord.Embed(description=f'{offender.mention} was banned from the server. <:red:1301608135370473532>',
-                              colour=discord.Colour.red())
-        await ctx.response.send_message(embed=embed, ephemeral=silent)
 
-    @moderation.command(name='unban', description='Unbans a user.')
-    @discord.app_commands.checks.has_permissions(ban_members=True)
-    async def sub_command(self, ctx, offender: discord.User, reason: Optional[str] = 'No reason given',
-                          silent: Optional[bool] = False):
-        reason = f'{ctx.user.mention}: {reason}.'
-        await ctx.guild.unban(offender, reason=reason)
-        embed = discord.Embed(colour=discord.Colour.green(),
-                              description=f'{offender.mention} was unbanned from the server. <:green:1301608134011256852>')
+        await offender.ban(reason=reason_for_audit, delete_message_days=del_days)
+        embed = discord.Embed(
+            description=f'{offender.mention} was banned from the server {time_str}. <:red:1301608135370473532>',
+            colour=discord.Colour.red())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
 
     @moderation.command(name='kick', description='Kicks a user.')
@@ -1188,5 +1206,23 @@ I wish you a great day further!''')
 
     @moderation.command(name='lock', description='Lock or unlock the channel.')
     @discord.app_commands.checks.has_permissions(mute_members=True)
-    async def sub_command(self, ctx, channel: Optional[discord.TextChannel]):
-        pass
+    async def sub_command(self, ctx, channel: Optional[discord.TextChannel], silent: Optional[bool] = False):
+        if channel is None:
+            channel = ctx.channel
+        if channel.type != discord.ChannelType.text:
+            embed = discord.Embed(
+                description=f'<:warn:1249069667159638206> {channel.mention} is not a valid text channel!',
+                colour=discord.Colour.red())
+            await ctx.response.send_message(embed=embed, ephemeral=True)
+        if channel.overwrites_for(ctx.guild.default_role).send_messages is False:
+            embed = discord.Embed(
+                description=f'{channel.mention} was unlocked by {ctx.user.mention}. <:blue:1301608132195258368>',
+                colour=discord.Colour.blue())
+            await channel.set_permissions(ctx.guild.default_role, overwrite=discord.PermissionOverwrite(send_messages=True))
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
+        else:
+            embed = discord.Embed(
+                description=f'{channel.mention} was locked by {ctx.user.mention}. <:blue:1301608132195258368>',
+                colour=discord.Colour.blue())
+            await channel.set_permissions(ctx.guild.default_role, overwrite=discord.PermissionOverwrite(send_messages=False))
+            await ctx.response.send_message(embed=embed, ephemeral=silent)
