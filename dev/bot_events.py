@@ -59,7 +59,7 @@ Report any issues to the [GitHub Issue Tracker](<https://github.com/Tywrap-Studi
 
 
 async def on_message(message: discord.Message, bot: commands.Bot) -> None:
-    if not message.content.startswith('>>'):
+    if not message.content.startswith(vars.botCommandPrefix):
         name = message.author.display_name
         id = f'{message.author.id}'
         text = message.content

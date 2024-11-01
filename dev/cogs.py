@@ -67,7 +67,7 @@ class StandaloneCog(commands.Cog):
                 user_id, guild_id, unban_time, reason = ban
                 try:
                     database.remove_temp_ban(user_id)
-                except discord.HTTPException:
+                except:
                     info(f'[{util.time()}] >LOG> Something went wrong while Flushing a database entry.')
                     continue
         info(f'[{util.time()}] >LOG> {ctx.author.name} Attempted to flush database.')

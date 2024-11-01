@@ -162,7 +162,7 @@ async def bot_run():
         intents.auto_moderation_execution = True
         intents.message_content = True
         async with CordBot(
-                '>>',
+                vars.botCommandPrefix,
                 web_client=client,
                 intents=intents
         ) as bot:
