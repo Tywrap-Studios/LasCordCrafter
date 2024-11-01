@@ -1117,7 +1117,7 @@ class ModCog(commands.Cog):
                 unban_time = unban_time + timedelta(days=dur_int * 30)  # Approximate month length
 
             database.add_temp_ban(offender.id, ctx.guild.id, unban_time.isoformat(), reason)
-            time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M%S')}"
+            time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M:%S')}"
         else:
             time_str = "indefinitely"
 
