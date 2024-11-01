@@ -349,9 +349,10 @@ class SanitizeServiceCog(commands.Cog):
         self.bot = bot
 
     # TODO>WIP[4]: Make a Context Menu work for this Cog.
+    # Might put a @app_commands.context_menu in the CordBot class.
 
-    @app_commands.command(name='sanitize',
-                          description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
+    @commands.hybrid_command(name='sanitize',
+                             description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     async def context(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
