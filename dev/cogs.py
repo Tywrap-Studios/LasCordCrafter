@@ -43,7 +43,7 @@ class StandaloneCog(commands.Cog):
     async def sync(self, ctx):
         tywrap = ctx.guild.get_member(1041430503389155492)
         if ctx.author == tywrap:
-            info(f'[{util.time()}] >LOG> Bot Tree Sync Started by {ctx.user.name}.')
+            info(f'[{util.time()}] >LOG> Bot Tree Sync Started by {ctx.author.name}.')
             await self.bot.tree.sync()
             info(f'[{util.time()}] >LOG> Finished Syncing Bot Tree.')
         else:
@@ -53,10 +53,24 @@ class StandaloneCog(commands.Cog):
     async def exit(self, ctx):
         tywrap = ctx.guild.get_member(1041430503389155492)
         if ctx.author == tywrap:
-            info(f'[{util.time()}] >LOG> Bot Stopped by {ctx.user.name}.')
+            info(f'[{util.time()}] >LOG> Bot Stopped by {ctx.author.name}.')
             await self.bot.close()
         else:
             info(f'[{util.time()}] >LOG> Failed to stop bot.')
+
+    @commands.command(name='debug-flush_database')
+    async def flush_database(self, ctx):
+        active_bans = database.get_active_bans()
+        tywrap = ctx.guild.get_member(1041430503389155492)
+        if ctx.author == tywrap:
+            for ban in active_bans:
+                user_id, guild_id, unban_time, reason = ban
+                try:
+                    database.remove_temp_ban(user_id)
+                except discord.HTTPException:
+                    info(f'[{util.time()}] >LOG> Something went wrong while Flushing a database entry.')
+                    continue
+        info(f'[{util.time()}] >LOG> {ctx.author.name} Attempted to flush database.')
 
     @app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
     async def slash_command(self, ctx, member: discord.Member) -> None:
@@ -1103,13 +1117,13 @@ class ModCog(commands.Cog):
                 unban_time = unban_time + timedelta(days=dur_int * 30)  # Approximate month length
 
             database.add_temp_ban(offender.id, ctx.guild.id, unban_time.isoformat(), reason)
-            time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M')}"
+            time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M%S')}"
         else:
             time_str = "indefinitely"
 
         await offender_dm.send(content=f'''Hi. Unfortunately I am here to inform you that you have been banned from GunjiCordia.
 The reason for your ban was: **{reason}**.
-You are banned {time_str}.
+You are banned **{time_str}**.
 The moderator responsible for your ban was {ctx.user.mention}.
 
 If you think this ban was not rightful, or an actual accident feel free to contact said, or a different moderator.

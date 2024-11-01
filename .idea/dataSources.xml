@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="tempbans" uuid="acace6c6-6b46-4f1a-92cc-d2481c6e2586">
+    <data-source source="LOCAL" name="tempbans" uuid="3071ffc3-5b63-46d4-b5c3-07aad0e2ed95">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Anaconda\envs\LasCordCrafter\discord-bots\dev\tempbans.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Anaconda\envs\LasCordCrafter\discord-bots\dev\databases\tempbans.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
         <library>
