@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import time
 from datetime import datetime
 from typing import Optional
@@ -67,6 +68,9 @@ class CordBot(commands.Bot):
         info('Bot Tree Synced.')
         info('-----------------------------------------Database-----------------------------------------')
         info('INFO: Utilizing sqlite3.')
+        info('Initializing databases Directory. . .')
+        os.makedirs('databases', exist_ok=True)
+        info('Directory Initialized.')
         info('Initializing Database(s). . .')
         database.init_db()
         info('Database(s) Initialized.')
@@ -128,6 +132,7 @@ class CordBot(commands.Bot):
                 try:
                     await guild.unban(discord.Object(id=user_id), reason="Temporary ban expired")
                     database.remove_temp_ban(user_id)
+                    info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
                 except discord.HTTPException:
                     info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
                     continue

@@ -29,7 +29,7 @@ async def on_member_join(member: discord.Member) -> None:
         clean_name = f'{clean_name_cs}'
         await member.edit(nick=clean_name)
         await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
-        info(f'[{util.time()}] >EVENT> Member joined: {nick} -> {clean_name}.]')
+        info(f'[{util.time()}] >EVENT> Member joined: {nick} -> {clean_name}.')
     else:
         wet_name = nick
         clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
@@ -37,7 +37,7 @@ async def on_member_join(member: discord.Member) -> None:
         if clean_name != nick:
             await member.edit(nick=clean_name)
             await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
-            info(f'[{util.time()}] >EVENT> Member joined: {nick} -> {clean_name}.]')
+            info(f'[{util.time()}] >EVENT> Member joined: {nick} -> {clean_name}.')
         else:
             info(f'[{util.time()}] >EVENT> Member joined: {nick}.')
     dm = await member.create_dm()

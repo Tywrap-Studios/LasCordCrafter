@@ -48,7 +48,6 @@ duregex = '^\d+\w*[smdw]$'
 trusted_team_tag_id = 1287526517248622592  # 1287179981843206144
 
 # Channels
-rolesChannel = '<#1189339256016093345>'
 ipChannel = '<#1238669922641510502>'
 techSupportChannel = '<#1188157890117242952>'
 logChannel = 1248374509778632744  # 1191085319102140528
