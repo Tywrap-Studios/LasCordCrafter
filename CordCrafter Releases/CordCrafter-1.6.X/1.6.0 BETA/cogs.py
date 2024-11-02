@@ -243,6 +243,28 @@ And hey, if you're there already, why not read the rules?
         await ctx.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /credits.')
 
+        async def cog_app_command_error(interaction, error):
+            if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+                await interaction.response.send_message(
+                    f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+                raise error
+            elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+                await interaction.response.send_message(
+                    f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+                raise error
+            elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+                await interaction.response.send_message(
+                    f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+                raise error
+            elif isinstance(error, discord.app_commands.errors.HTTPException):
+                await interaction.response.send_message(
+                    f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+                raise error
+            else:
+                await interaction.response.send_message(
+                    f'Something unexpected happened while handling this command.\nStandaloneCogError: {error}', ephemeral=True)
+                raise error
+
 
 class AppealServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -342,6 +364,28 @@ class AppealServiceCog(commands.Cog):
         else:
             await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
 
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nAppealServiceCogError: {error}', ephemeral=True)
+            raise error
+
 
 class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -351,11 +395,36 @@ class SanitizeServiceCog(commands.Cog):
     # Might put a @discord.app_commands.context_menu in the CordBot class.
 
     @discord.app_commands.command(name='sanitize',
-                             description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
+                                  description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     async def sanitize(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
         info(f'[{util.time()}] >LOG> {ctx.user.name} sanitized {member.name} using a command.]')
+
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nSanitizeServiceCogError: {error}',
+                ephemeral=True)
+            raise error
 
 
 class ClaimCog(commands.Cog):
@@ -503,6 +572,31 @@ This means that anyone in a party you're in, has those perms.
                               description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
         info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims perms for {mention.name}.')
+
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nClaimCogError: {error}',
+                ephemeral=True)
+            raise error
 
 
 class NotesCog(commands.Cog):
@@ -660,6 +754,31 @@ Remember, **be clear** about what you need **as soon as possible.**
         embed = discord.Embed(colour=discord.Colour.blurple(), description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
         info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes dontasktoask for {mention.name}.')
+
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nNotesCogError: {error}',
+                ephemeral=True)
+            raise error
 
 
 class CmdCog(commands.Cog):
@@ -849,6 +968,31 @@ class CmdCog(commands.Cog):
         command = f'/minecraft:pardon {player}{reason1}'
         await send_rcon(command, ctx, True)
 
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nCmdCogError: {error}',
+                ephemeral=True)
+            raise error
+
 
 class StatusCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -995,6 +1139,31 @@ class StatusCog(commands.Cog):
         else:
             await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
 
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nStatusCogError: {error}',
+                ephemeral=True)
+            raise error
+
 
 class ThreadCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -1074,6 +1243,31 @@ class ThreadCog(commands.Cog):
         embed = discord.Embed(title=f'Info about {thread.mention}', description=description)
         await ctx.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.user.name} viewed info about {thread.name}.')
+
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nThreadCogError: {error}',
+                ephemeral=True)
+            raise error
 
 
 class ModCog(commands.Cog):
@@ -1238,3 +1432,28 @@ I wish you a great day further!''')
             await channel.set_permissions(ctx.guild.default_role,
                                           overwrite=discord.PermissionOverwrite(send_messages=False))
             await ctx.response.send_message(embed=embed, ephemeral=silent)
+
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
+                f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
+                f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        else:
+            await interaction.response.send_message(
+                f'Something unexpected happened while handling this command.\nModCogError: {error}',
+                ephemeral=True)
+            raise error
