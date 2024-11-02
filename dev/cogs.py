@@ -323,13 +323,12 @@ class AppealServiceCog(commands.Cog):
                 op = ctx.guild.get_member_named(opname)
                 closer = ctx.user
                 embed = discord.Embed(title='Ban Appeal Closed', description=f'''
-    <:id:1279190510027800709> **Ticket Opened by:**
-    <:asterix:1279190506777088000> {op.mention}
+<:id:1279190510027800709> **Ticket Opened by:**
+<:asterix:1279190506777088000> {op.mention}
 
-    <:leave:1279190513190178826> **Ticket Closed by:**
-    <:asterix:1279190506777088000> {closer.mention}
-    <:arrow_under:1278834153655107646> **__This ticket was Force Closed__**
-    ''', colour=discord.Colour.green())
+<:leave:1279190513190178826> **Ticket Closed by:**
+<:asterix:1279190506777088000> {closer.mention}
+<:arrow_under:1278834153655107646> **__This ticket was Force Closed__**''', colour=discord.Colour.green())
                 time = datetime.now().strftime('%H:%M')
                 datetoday = date.today().strftime('%d/%m/%Y')
                 embed.set_footer(text=f'{datetoday} {time}')
