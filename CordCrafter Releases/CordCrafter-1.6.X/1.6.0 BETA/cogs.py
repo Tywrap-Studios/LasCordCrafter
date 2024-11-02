@@ -73,7 +73,7 @@ class StandaloneCog(commands.Cog):
         info(f'[{util.time()}] >LOG> {ctx.author.name} Attempted to flush database.')
 
     @discord.app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
-    async def slash_command(self, ctx, member: discord.Member) -> None:
+    async def ip_joining(self, ctx, member: discord.Member) -> None:
         await ctx.response.send_message(f'''Hey, <@{member.id}>!
 Are you wondering how to join? The server IP alongside the Modpack Link and the Rules are all located in
 - {vars.ipChannel}.
@@ -84,7 +84,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ip-joining for {member.name}.')
 
     @discord.app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
-    async def slash_command(self, ctx) -> None:
+    async def ping(self, ctx) -> None:
         global latency_val
         latency = round(self.bot.latency * 1000)
         if latency > 200 or latency == 200:
@@ -101,7 +101,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ping -> {latency_val}.')
 
     @discord.app_commands.command(name="bean", description="Beans the member. Yep. That's all it does.")
-    async def slash_command(self, ctx, member: discord.Member):
+    async def bean(self, ctx, member: discord.Member):
         embed = discord.Embed(title='Member Beaned',
                               description=f'Member: {member.mention},\nResponsible "moderator": {ctx.user.mention}',
                               colour=discord.Colour.og_blurple())
@@ -110,7 +110,7 @@ And hey, if you're there already, why not read the rules?
 
     # noinspection SpellCheckingInspection
     @discord.app_commands.command(name='stats', description='Displays the Bot\'s statistics.')
-    async def slash_command(self, ctx) -> None:
+    async def stats(self, ctx) -> None:
         # Stats
         global latency_val
         cpu_stat = psutil.cpu_percent(5)
@@ -165,7 +165,7 @@ And hey, if you're there already, why not read the rules?
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /stats -> {latency_val}.')
 
     @discord.app_commands.command(name='resign', description='Resigns the Minecraft admin you chose.')
-    async def slash_command(self, ctx, admin: discord.Member):
+    async def resign(self, ctx, admin: discord.Member):
         tywrap = ctx.guild.get_member(1041430503389155492)
         old_role = ctx.guild.get_role(vars.minecraftAdmin)
         new_role = ctx.guild.get_role(vars.resigned)
@@ -194,7 +194,7 @@ And hey, if you're there already, why not read the rules?
 
     @discord.app_commands.command(name='say', description='Says stuff as the bot')
     @discord.app_commands.checks.has_permissions(administrator=True)
-    async def slash_command(self, ctx, text: str, reference: Optional[str]):
+    async def say(self, ctx, text: str, reference: Optional[str]):
         if reference is not None:
             reference_int = int(reference)
             reference_m = await ctx.channel.fetch_message(reference_int)
@@ -207,7 +207,7 @@ And hey, if you're there already, why not read the rules?
 
     # noinspection SpellCheckingInspection
     @discord.app_commands.command(name='credits', description='Displays Credits for the bot.')
-    async def slash_command(self, ctx):
+    async def credits(self, ctx):
         description = f'''<:resources:1278835693900136532> **Coding:**
 <:arrow_under:1278834153655107646> Tiazzz -- On [GitHub](<https://github.com/TywrapStudios>)
 
@@ -250,7 +250,7 @@ class AppealServiceCog(commands.Cog):
 
     @discord.app_commands.command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
     @discord.app_commands.checks.has_permissions(administrator=True)
-    async def slash_command(self, ctx, channel: discord.TextChannel):
+    async def setup(self, ctx, channel: discord.TextChannel):
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
                               description='By using the command **/appeal**, a Private Channel can be made for your Appeal.')
         await channel.send(embed=embed,
@@ -260,7 +260,7 @@ class AppealServiceCog(commands.Cog):
         info(f'[{util.time()}] >LOG> Setup Completed in #{channel.name} by {ctx.user.name}.')
 
     @discord.app_commands.command(name='appeal', description='Manually appeals a Minecraft Ban Appeal ticket.')
-    async def slash_command(self, ctx):
+    async def appeal(self, ctx):
         view = views.ManualAppealButton()
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
                               description='By clicking the button below, a Private Channel will be made for your Appeal.')
@@ -268,7 +268,7 @@ class AppealServiceCog(commands.Cog):
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /appeal.')
 
     @discord.app_commands.command(name='add', description='Adds a user to the current ticket.')
-    async def slash_command(self, ctx, member: discord.Member):
+    async def add(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
             await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
                                               embed_links=True)
@@ -288,7 +288,7 @@ class AppealServiceCog(commands.Cog):
                     await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
     @discord.app_commands.command(name='remove', description='Removes a user from the current ticket.')
-    async def slash_command(self, ctx, member: discord.Member):
+    async def remove(self, ctx, member: discord.Member):
         if "ban-appeal-" in ctx.channel.name and member != ctx.user:
             await ctx.channel.set_permissions(member, overwrite=None)
             embed = discord.Embed(title='Member Remove',
@@ -304,7 +304,7 @@ class AppealServiceCog(commands.Cog):
                     await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
     @discord.app_commands.command(name='close', description='Closes the ticket.')
-    async def slash_command(self, ctx):
+    async def close(self, ctx):
         embed = discord.Embed(title='Confirm',
                               description='Please confirm that you want to close your Ban Appeal Ticket.',
                               colour=discord.Colour.green())
@@ -313,7 +313,7 @@ class AppealServiceCog(commands.Cog):
         info(f'[{util.time()}] >LOG> {ctx.user.name} closed {ctx.channel.name}.')
 
     @discord.app_commands.command(name='forceclose', description='Forcefully closes the selected ticket.')
-    async def slash_command(self, ctx, ticket: discord.TextChannel):
+    async def forceclose(self, ctx, ticket: discord.TextChannel):
         allowedrole1 = ctx.guild.get_role(vars.discordAdmin)
         allowedrole2 = ctx.guild.get_role(vars.minecraftAdmin)
         if allowedrole1 in ctx.user.roles or allowedrole2 in ctx.user.roles:
@@ -323,13 +323,12 @@ class AppealServiceCog(commands.Cog):
                 op = ctx.guild.get_member_named(opname)
                 closer = ctx.user
                 embed = discord.Embed(title='Ban Appeal Closed', description=f'''
-    <:id:1279190510027800709> **Ticket Opened by:**
-    <:asterix:1279190506777088000> {op.mention}
+<:id:1279190510027800709> **Ticket Opened by:**
+<:asterix:1279190506777088000> {op.mention}
 
-    <:leave:1279190513190178826> **Ticket Closed by:**
-    <:asterix:1279190506777088000> {closer.mention}
-    <:arrow_under:1278834153655107646> **__This ticket was Force Closed__**
-    ''', colour=discord.Colour.green())
+<:leave:1279190513190178826> **Ticket Closed by:**
+<:asterix:1279190506777088000> {closer.mention}
+<:arrow_under:1278834153655107646> **__This ticket was Force Closed__**''', colour=discord.Colour.green())
                 time = datetime.now().strftime('%H:%M')
                 datetoday = date.today().strftime('%d/%m/%Y')
                 embed.set_footer(text=f'{datetoday} {time}')
@@ -354,7 +353,7 @@ class SanitizeServiceCog(commands.Cog):
     @discord.app_commands.command(name='sanitize',
                              description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
-    async def context(self, ctx, member: discord.Member):
+    async def sanitize(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
         info(f'[{util.time()}] >LOG> {ctx.user.name} sanitized {member.name} using a command.]')
 
