@@ -390,12 +390,18 @@ class AppealServiceCog(commands.Cog):
 class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.ctx_menu = discord.app_commands.ContextMenu(
+            name='Sanitize & Dehoist',
+            callback=self.sanitize_ctx_menu_callback
+        )
+        self.bot.tree.add_command(self.ctx_menu)
 
-    # TODO>WIP[4]: Make a Context Menu work for this Cog.
-    # Might put a @discord.app_commands.context_menu in the CordBot class.
+    @discord.app_commands.checks.has_permissions(manage_nicknames=True)
+    async def sanitize_ctx_menu_callback(self, ctx: discord.Interaction, member: discord.Member):
+        await util.sanitize(ctx, member)
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sanitized {member.name} using a Context Menu.')
 
-    @discord.app_commands.command(name='sanitize',
-                                  description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
+    @discord.app_commands.command(name='sanitize', description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     async def sanitize(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
@@ -419,6 +425,10 @@ class SanitizeServiceCog(commands.Cog):
         elif isinstance(error, discord.app_commands.errors.HTTPException):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
             raise error
         else:
             await interaction.response.send_message(
@@ -591,6 +601,10 @@ This means that anyone in a party you're in, has those perms.
         elif isinstance(error, discord.app_commands.errors.HTTPException):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
             raise error
         else:
             await interaction.response.send_message(
@@ -773,6 +787,10 @@ Remember, **be clear** about what you need **as soon as possible.**
         elif isinstance(error, discord.app_commands.errors.HTTPException):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
             raise error
         else:
             await interaction.response.send_message(
@@ -987,6 +1005,10 @@ class CmdCog(commands.Cog):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
             raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
+            raise error
         else:
             await interaction.response.send_message(
                 f'Something unexpected happened while handling this command.\nCmdCogError: {error}',
@@ -1158,6 +1180,10 @@ class StatusCog(commands.Cog):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
             raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
+            raise error
         else:
             await interaction.response.send_message(
                 f'Something unexpected happened while handling this command.\nStatusCogError: {error}',
@@ -1262,6 +1288,10 @@ class ThreadCog(commands.Cog):
         elif isinstance(error, discord.app_commands.errors.HTTPException):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
             raise error
         else:
             await interaction.response.send_message(
@@ -1451,6 +1481,10 @@ I wish you a great day further!''')
         elif isinstance(error, discord.app_commands.errors.HTTPException):
             await interaction.response.send_message(
                 f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
+            raise error
+        elif isinstance(error, discord.app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message(
+                f'Something went wrong while invoking this command.\nError: {error}', ephemeral=True)
             raise error
         else:
             await interaction.response.send_message(
