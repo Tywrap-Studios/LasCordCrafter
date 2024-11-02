@@ -25,7 +25,7 @@ async def on_member_join(member: discord.Member) -> None:
         wet_name = re.sub(vars.repatce, '', nick)
         if len(wet_name) < 1:
             wet_name = 'Robin'
-        clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True, retain_diacritics=True)
+        clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
         clean_name = f'{clean_name_cs}'
         await member.edit(nick=clean_name)
         await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
