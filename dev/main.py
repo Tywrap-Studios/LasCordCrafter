@@ -44,6 +44,14 @@ class CordBot(commands.Bot):
         info('Note that this version is a [BETA] version of the software. Use at your own risk!')
         info('Some features may not work as intended.')
         info('-------------------------------------------Init-------------------------------------------')
+        info('Cleaning old log files. . .')
+        log_files = [f for f in os.listdir(vars.log_dir_path) if f.startswith('cordcrafter-')]
+        if len(log_files) > 10:
+            log_files.sort()
+            oldest_log = vars.log_dir_path + log_files[0]
+            os.remove(oldest_log)
+            info(f'Removed old log file: {log_files[0]}')
+        info('All files checked and potentially cleaned.')
         info('Starting Uptime Timer. . .')
         self._start_time = time.time()
         info('Timer Started.')
@@ -148,7 +156,7 @@ async def bot_run():
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    with open(vars.log_dir_path + 'cordcrafter.log', 'w') as file:
+    with open(vars.log_dir_path + util.current_log_file, 'w') as file:
         file.write(f'// Log file init at {util.time()}\n\n')
 
     async with ClientSession() as client:

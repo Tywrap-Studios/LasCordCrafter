@@ -111,7 +111,17 @@ def time():
     return datetime.now().strftime('%H:%M:%S')
 
 
+def get_log_filename():
+    timestamp = datetime.now().strftime('%d-%m_%H.%M.%S')
+    return f'cordcrafter-{timestamp}.log'
+
+
+# Store the current log filename as a module-level variable
+current_log_file = get_log_filename()
+
+
 def info(txt: str):
-    with open(vars.log_dir_path + 'cordcrafter.log', 'a') as f:
+    log_path = vars.log_dir_path + current_log_file
+    with open(log_path, 'a') as f:
         print(txt)
         f.write(txt + '\n')

@@ -643,7 +643,7 @@ class NotesCog(commands.Cog):
         embed = discord.Embed(colour=discord.Colour.blurple(),
                               title='<:against_rules:1279142167729668096> Cracked Instances:', description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes cracked for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes cracked for {mention}.')
 
     @notes.command(name='bedrock', description='Explains the fuzz about Bedrock accounts.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -661,7 +661,7 @@ class NotesCog(commands.Cog):
                               title='<:bedrock:1279144625168191598> Bedrock Instances:',
                               description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes bedrock for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes bedrock for {mention}.')
 
     @notes.command(name='zip-import', description='How to manually import modpacks using Zip-Files.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -679,7 +679,7 @@ class NotesCog(commands.Cog):
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:download:1279148597094514698> Zip-Importing:',
                               description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes zip-import for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes zip-import for {mention}.')
 
     @notes.command(name='modlist', description='How to make a modlist.txt file using command prompt.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -697,7 +697,7 @@ Please note that some knowledge about the `cd` command, and cmd in general, is t
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:perms:1278838464456032388> Modlist:',
                               description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes modlist for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes modlist for {mention}.')
 
     @notes.command(name='binary-search', description='How to perform a binary-search instead of a sequential-search')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -722,7 +722,7 @@ Please note that some knowledge about the `cd` command, and cmd in general, is t
         embed.set_image(
             url='https://media.discordapp.net/attachments/1249069998148812930/1279156096103354448/binary_search.gif?ex=66d36a72&is=66d218f2&hm=b7dd480dfb0d4da00a1359d15ca47a0540a8de18bbe6ff8d8baf1bf0a5301788&=&width=480&height=319')
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes binary-search for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes binary-search for {mention}.')
 
     @notes.command(name='provider', description='What server provider do we use?')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -745,7 +745,7 @@ Without them we would now be nothing :purple_heart:
         embed.set_footer(text='https://centralhosting.au/central-hosting/',
                          icon_url='https://media.discordapp.net/attachments/1249069998148812930/1279200313345310741/central_hosting_au.png?ex=66d393a1&is=66d24221&hm=0c085589b8c90653db1aca21932b391e33d68330adc9c44de889a21dc60a029b&=&format=webp&quality=lossless&width=450&height=450')
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes provider for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes provider for {mention}.')
 
     @notes.command(name='dontasktoask', description='Don\'t ask to ask. Just ask.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
@@ -774,7 +774,7 @@ Remember, **be clear** about what you need **as soon as possible.**
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), description=description)
         await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes dontasktoask for {mention.name}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes dontasktoask for {mention}.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
