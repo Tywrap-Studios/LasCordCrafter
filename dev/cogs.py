@@ -250,11 +250,13 @@ And hey, if you're there already, why not read the rules?
                 raise error
             elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
                 await interaction.response.send_message(
-                    f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+                    f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                    ephemeral=True)
                 raise error
             elif isinstance(error, discord.app_commands.errors.MissingPermissions):
                 await interaction.response.send_message(
-                    f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+                    f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                    ephemeral=True)
                 raise error
             elif isinstance(error, discord.app_commands.errors.HTTPException):
                 await interaction.response.send_message(
@@ -262,7 +264,8 @@ And hey, if you're there already, why not read the rules?
                 raise error
             else:
                 await interaction.response.send_message(
-                    f'Something unexpected happened while handling this command.\nStandaloneCogError: {error}', ephemeral=True)
+                    f'Something unexpected happened while handling this command.\nStandaloneCogError: {error}',
+                    ephemeral=True)
                 raise error
 
 
@@ -371,11 +374,13 @@ class AppealServiceCog(commands.Cog):
             raise error
         elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
             await interaction.response.send_message(
-                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+                f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
             raise error
         elif isinstance(error, discord.app_commands.errors.MissingPermissions):
             await interaction.response.send_message(
-                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}', ephemeral=True)
+                f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
+                ephemeral=True)
             raise error
         elif isinstance(error, discord.app_commands.errors.HTTPException):
             await interaction.response.send_message(
@@ -383,7 +388,8 @@ class AppealServiceCog(commands.Cog):
             raise error
         else:
             await interaction.response.send_message(
-                f'Something unexpected happened while handling this command.\nAppealServiceCogError: {error}', ephemeral=True)
+                f'Something unexpected happened while handling this command.\nAppealServiceCogError: {error}',
+                ephemeral=True)
             raise error
 
 
@@ -401,7 +407,8 @@ class SanitizeServiceCog(commands.Cog):
         await util.sanitize(ctx, member)
         info(f'[{util.time()}] >LOG> {ctx.user.name} sanitized {member.name} using a Context Menu.')
 
-    @discord.app_commands.command(name='sanitize', description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
+    @discord.app_commands.command(name='sanitize',
+                                  description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
     async def sanitize(self, ctx, member: discord.Member):
         await util.sanitize(ctx, member)
@@ -1354,6 +1361,29 @@ I wish you a great day further!''')
         embed = discord.Embed(
             description=f'{offender.mention} was banned from the server {time_str}. <:red:1301608135370473532>',
             colour=discord.Colour.red())
+        await ctx.response.send_message(embed=embed, ephemeral=silent)
+
+    @moderation.command(name='unban', description='Unbans the user.')
+    @discord.app_commands.checks.has_permissions(ban_members=True)
+    async def unban(self, ctx, offender: discord.User, reason: Optional[str] = 'No reason given',
+                    silent: Optional[bool] = False):
+        reason_for_audit = f'{ctx.user.mention}: {reason}.'
+        active_bans = database.get_active_bans()
+
+        for ban in active_bans:
+            user_id, guild_id, unban_time, reason = ban
+
+            if offender.id == user_id:
+                try:
+                    database.remove_temp_ban(user_id)
+                    info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
+                except discord.HTTPException:
+                    info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
+                    continue
+        ctx.guild.unban(user=offender, reason=reason_for_audit)
+        embed = discord.Embed(
+            description=f'{offender.mention} was unbanned from the server. <:red:1301608135370473532>',
+            colour=discord.Colour.green())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
 
     @moderation.command(name='kick', description='Kicks a user.')
