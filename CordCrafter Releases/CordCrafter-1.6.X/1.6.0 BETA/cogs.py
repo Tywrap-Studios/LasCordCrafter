@@ -851,12 +851,7 @@ class CmdCog(commands.Cog):
 
     @cmd.command(name='tempban', description='Temporarily Bans the selected player from the server.')
     async def sub_command(self, ctx, player_user: str, duration: str, reason: Optional[str]):
-        d_short_s = duration.replace("seconds", "s")
-        d_short_m = d_short_s.replace("minutes", "m")
-        d_short_d = d_short_m.replace("days", "d")
-        d_short_w = d_short_d.replace("weeks", "w")
-        d_short_ws = d_short_w.replace(" ", "")
-        duration_v2 = d_short_ws
+        duration_v2 = util.format_duration(duration)
         if reason is None:
             reason1 = ''
         else:
@@ -1030,143 +1025,135 @@ class StatusCog(commands.Cog):
     status = app_commands.Group(name='status', description='Commands to send pregen embeds about stati.')
 
     @status.command(name='downtime', description='Pregen a Downtime Embed, should be used when the server is down.')
+    @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
     async def sub_command(self, ctx, title: str, summary: Optional[str], impact: Optional[str],
                           channel: Optional[discord.TextChannel], ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}; DOWN'
-        if await util.check_for_roles_status(ctx):
-            await self.bot.change_presence(
+        await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                 status=discord.Status.online)
-            if channel is None:
-                channel = ctx.channel
-            if summary is None:
-                summary = 'No summary was provided.'
-            if impact is None:
-                impact = 'No impact.'
-            if ping is None:
-                ping = ' '
-            else:
-                ping = ping.mention
-            description = f"""**Summary:**
+        if channel is None:
+            channel = ctx.channel
+        if summary is None:
+            summary = 'No summary was provided.'
+        if impact is None:
+            impact = 'No impact.'
+        if ping is None:
+            ping = ' '
+        else:
+            ping = ping.mention
+        description = f"""**Summary:**
 {summary}
 
 **Impact:**
 {impact}"""
-            embed = discord.Embed(title=f'Downtime - {title}', description=description,
+        embed = discord.Embed(title=f'Downtime - {title}', description=description,
                                   colour=discord.Colour.from_str('#fd5151'), timestamp=datetime.now())
-            embed.set_footer(text='CordCraft',
+        embed.set_footer(text='CordCraft',
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping)
-            view = views.DeleteEmbed(message=message)
-            await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+        message = await channel.send(embed=embed, content=ping)
+        view = views.DeleteEmbed(message=message)
+        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
-            info(f'[{util.time()}] >STATUS> {ctx.user.name} stated the server as DOWNTIME: {title}.')
-        else:
-            await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
+        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated the server as DOWNTIME: {title}.')
 
     @status.command(name='update',
                     description='Pregen a Downtime Update Embed, should be used when an update about a downtime can be given.')
+    @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
+                                              vars.gunjiCord)
     async def sub_command(self, ctx, title: str, summary: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}'
-        if await util.check_for_roles_status(ctx):
-            await self.bot.change_presence(
+        await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                 status=discord.Status.online)
-            if channel is None:
-                channel = ctx.channel
-            if summary is None:
-                summary = 'No summary was provided.'
-            if ping is None:
-                ping = ' '
-            else:
-                ping = ping.mention
-            description = f"""**Summary:**
-{summary}"""
-            embed = discord.Embed(title=f'Downtime Update - {title}', description=description,
-                                  colour=discord.Colour.from_str('#e2a915'), timestamp=datetime.now())
-            embed.set_footer(text='CordCraft',
-                             icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping)
-            view = views.DeleteEmbed(message=message)
-            await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
-                                            view=view)
-            info(f'[{util.time()}] >STATUS> {ctx.user.name} stated a status update: {title}.')
+        if channel is None:
+            channel = ctx.channel
+        if summary is None:
+            summary = 'No summary was provided.'
+        if ping is None:
+            ping = ' '
         else:
-            await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
+            ping = ping.mention
+        description = f"""**Summary:**
+{summary}"""
+        embed = discord.Embed(title=f'Downtime Update - {title}', description=description,
+                                  colour=discord.Colour.from_str('#e2a915'), timestamp=datetime.now())
+        embed.set_footer(text='CordCraft',
+                             icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
+        message = await channel.send(embed=embed, content=ping)
+        view = views.DeleteEmbed(message=message)
+        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+                                            view=view)
+        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated a status update: {title}.')
 
     @status.command(name='uptime',
                     description='Pregen a Downtime Update Embed, that\'s specifically for the service being back up.')
+    @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
+                                              vars.gunjiCord)
     async def sub_command(self, ctx, title: str, note: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
-        if await util.check_for_roles_status(ctx):
-            await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'), status=discord.Status.online)
-            if channel is None:
-                channel = ctx.channel
-            if note is None:
-                note = 'No extra note was provided.'
-            if ping is None:
-                ping = ' '
-            else:
-                ping = ping.mention
-            description = f"""**Extra note:**
-{note}"""
-            embed = discord.Embed(title=f'Downtime Update - {title}', description=description,
-                                  colour=discord.Colour.from_str('#2dc79c'), timestamp=datetime.now())
-            embed.set_footer(text='CordCraft',
-                             icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping)
-            view = views.DeleteEmbed(message=message)
-            await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
-                                            view=view)
-            info(f'[{util.time()}] >STATUS> {ctx.user.name} stated the server as UP: {title}.')
+        await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'), status=discord.Status.online)
+        if channel is None:
+            channel = ctx.channel
+        if note is None:
+            note = 'No extra note was provided.'
+        if ping is None:
+            ping = ' '
         else:
-            await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
+            ping = ping.mention
+        description = f"""**Extra note:**
+{note}"""
+        embed = discord.Embed(title=f'Downtime Update - {title}', description=description,
+                                  colour=discord.Colour.from_str('#2dc79c'), timestamp=datetime.now())
+        embed.set_footer(text='CordCraft',
+                             icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
+        message = await channel.send(embed=embed, content=ping)
+        view = views.DeleteEmbed(message=message)
+        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+                                            view=view)
+        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated the server as UP: {title}.')
 
     @status.command(name='notice',
                     description='Pregen a Notice Embed.')
+    @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
+                                              vars.gunjiCord)
     async def sub_command(self, ctx, note: str, channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
-        if await util.check_for_roles_status(ctx):
-            if channel is None:
-                channel = ctx.channel
-            if ping is None:
-                ping = ' '
-            else:
-                ping = ping.mention
-            description = f"""{note}"""
-            embed = discord.Embed(title=f'Notice:', description=description, colour=discord.Colour.dark_gold(),
-                                  timestamp=datetime.now())
-            embed.set_footer(text='CordCraft',
-                             icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
-            message = await channel.send(embed=embed, content=ping)
-            view = views.DeleteEmbed(message=message)
-            await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
-                                            view=view)
-            info(f'[{util.time()}] >STATUS> {ctx.user.name} stated a NOTICE: {note}.')
+        if channel is None:
+            channel = ctx.channel
+        if ping is None:
+            ping = ' '
         else:
-            await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
+            ping = ping.mention
+        description = f"""{note}"""
+        embed = discord.Embed(title=f'Notice:', description=description, colour=discord.Colour.dark_gold(),
+                                  timestamp=datetime.now())
+        embed.set_footer(text='CordCraft',
+                             icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
+        message = await channel.send(embed=embed, content=ping)
+        view = views.DeleteEmbed(message=message)
+        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+                                            view=view)
+        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated a NOTICE: {note}.')
 
     @status.command(name='status', description='Change the Bot\'s status to say Minecraft Server Stati.')
+    @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
+                                              vars.gunjiCord)
     async def slash_command(self, ctx, status: str, reset: Optional[bool] = False, down: Optional[bool] = False):
         if down:
             status = f'{status}; DOWN'
-        else:
-            status = status
-        if await util.check_for_roles_status(ctx):
-            if reset is False:
-                await self.bot.change_presence(
+        if reset is False:
+            await self.bot.change_presence(
                     activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                     status=discord.Status.online)
-                await ctx.response.send_message('Attempted to change status.', ephemeral=True)
-                info(f'[{util.time()}] >STATUS> {ctx.user.name} changed bot status: {status}.')
-            else:
-                await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'),
-                                               status=discord.Status.online)
-                await ctx.response.send_message('Attempted to reset status.', ephemeral=True)
-                info(f'[{util.time()}] >STATUS> {ctx.user.name} reset the bot status.')
+            await ctx.response.send_message('Attempted to change status.', ephemeral=True)
+            info(f'[{util.time()}] >STATUS> {ctx.user.name} changed bot status: {status}.')
         else:
-            await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
+            await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'),
+                                               status=discord.Status.online)
+            await ctx.response.send_message('Attempted to reset status.', ephemeral=True)
+            info(f'[{util.time()}] >STATUS> {ctx.user.name} reset the bot status.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):

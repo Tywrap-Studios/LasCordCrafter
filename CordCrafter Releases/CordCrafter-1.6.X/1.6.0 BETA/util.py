@@ -20,14 +20,6 @@ async def send_webhook(url: str, content: str, title: str) -> None:
     info(f'[{time()}] >LOG> aiohttp client session used for Webhook.')
 
 
-async def check_for_roles_status(ctx: discord.Interaction) -> bool:
-    allowed1 = ctx.guild.get_role(vars.discordAdmin) in ctx.user.roles
-    allowed2 = ctx.guild.get_role(vars.minecraftAdmin) in ctx.user.roles
-    allowed3 = ctx.guild.get_role(vars.centralHosting) in ctx.user.roles
-    allowed4 = ctx.guild.get_role(vars.gunjiCord) in ctx.user.roles
-    return allowed1 or allowed2 or allowed3 or allowed4
-
-
 async def sanitize(ctx, member):
     nick = member.display_name
     if re.match(vars.repat, nick):
