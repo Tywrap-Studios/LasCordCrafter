@@ -46,7 +46,7 @@ duregex = '^\d+\w*[smdw]$'
 # THE CURRENT VALUES ARE MERELY TEST VALUES!
 
 # Tags
-trusted_team_tag_id = 1287526517248622592  # 1287179981843206144
+trusted_team_tag_id = 1287179981843206144
 
 # Channels
 ipChannel = '<#1238669922641510502>'
