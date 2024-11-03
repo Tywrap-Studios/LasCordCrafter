@@ -1362,6 +1362,7 @@ I wish you a great day further!''')
             description=f'{offender.mention} was banned from the server {time_str}. <:red:1301608135370473532>',
             colour=discord.Colour.red())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
+        info(f'{util.time()} >LOG> {ctx.user.name} Banned {offender.name} from {ctx.guild.name} for {reason} {time_str}.')
 
     @moderation.command(name='unban', description='Unbans the user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
@@ -1385,6 +1386,7 @@ I wish you a great day further!''')
             description=f'{offender.mention} was unbanned from the server. <:red:1301608135370473532>',
             colour=discord.Colour.green())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
+        info(f'{util.time()} >LOG> {ctx.user.name} Unbanned {offender.name} from {ctx.guild.name} for {reason}.')
 
     @moderation.command(name='kick', description='Kicks a user.')
     @discord.app_commands.checks.has_permissions(kick_members=True)
@@ -1402,6 +1404,7 @@ I wish you a great day further!''')
         embed = discord.Embed(description=f'{offender.mention} was kicked from the server. <:red:1301608135370473532>',
                               colour=discord.Colour.red())
         await ctx.response.send_message(embed=embed, ephemeral=silent)
+        info(f'{util.time()} >LOG> {ctx.user.name} Kicked {offender.name} from {ctx.guild.name} for {reason}.')
 
     @moderation.command(name='timeout', description='Times out a user.')
     @discord.app_commands.checks.has_permissions(mute_members=True)
