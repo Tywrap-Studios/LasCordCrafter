@@ -42,7 +42,7 @@ async def send_rcon(command: str, ctx, admin_only: bool):
     else:
         if admin_only and not allowed:
             embed = discord.Embed(colour=discord.Colour.red(),
-                                  description='<:against_rules:1279142167729668096> You are not allowed to connect this Command to an RCON Client.\n-# `Error Code 403`',
+                                  description='<:against_rules:1279142167729668096> You are not allowed to connect this Command to an RCON Client.',
                                   title='RCON: <:resources:1278835693900136532>')
             await ctx.response.send_message(embed=embed, ephemeral=True)
         else:
@@ -66,9 +66,21 @@ async def handle_rcon(command, ctx):
             await send_log_webhook(command=command, response=response, source=ctx.user)
             await ctx.response.send_message(embed=embed, ephemeral=True)
             info(f'[{util.time()}] >RCON> Package sent: `{command}`, Source: {ctx.user.name}, Response: {response}')
-        except:
+        except ConnectionRefusedError as e:
             embed = discord.Embed(colour=discord.Colour.red(),
-                                  description='Something went wrong connecting to the RCON Client.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# `Error Code 500`',
+                                  description=f'The connection could not be made as the server actively refused it.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# {e}',
+                                  title='RCON: <:resources:1278835693900136532>')
+            await ctx.response.send_message(embed=embed, ephemeral=True)
+            info(f'[{util.time()}] >RCON> A connection could not be made as the server actively refused it.')
+        except (ConnectionResetError, ConnectionAbortedError) as e:
+            embed = discord.Embed(colour=discord.Colour.red(),
+                                  description=f'The connection was terminated, the server may have been stopped.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# {e}',
+                                  title='RCON: <:resources:1278835693900136532>')
+            await ctx.response.send_message(embed=embed, ephemeral=True)
+            info(f'[{util.time()}] >RCON> The connection was terminated, the server may have been stopped.')
+        except Exception as e:
+            embed = discord.Embed(colour=discord.Colour.red(),
+                                  description=f'Something went wrong connecting to the RCON Client.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# {e}',
                                   title='RCON: <:resources:1278835693900136532>')
             await ctx.response.send_message(embed=embed, ephemeral=True)
             info(f'[{util.time()}] >RCON> Something went wrong connecting to the RCON Client.')
@@ -79,8 +91,5 @@ async def handle_message(command, channel):
     with mcrcon_client as mcr:
         try:
             mcr.command(command)
-        except:
-            embed = discord.Embed(colour=discord.Colour.red(),
-                                  description='Something went wrong connecting to the RCON Client.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# `Error Code 500`',
-                                  title='RCON: <:resources:1278835693900136532>')
-            await channel.send(embed=embed)
+        except Exception as e:
+            info(f'[{util.time()}] >RCON> Something went wrong connecting to the RCON Client. {e}')
