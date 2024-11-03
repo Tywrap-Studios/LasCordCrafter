@@ -27,7 +27,7 @@ botPing = f'<@{botId}>'
 botVersion = 'CordCrafter 1.6.0 [BETA]'  # Interchangeable, please change for final release.
 botName = 'CordToaster'  # Interchangeable, please change for final release.
 botDescription = '''This is a Bot made by Tywrap Studios for the GunjiCordia Discord server to help people and others in the wonderful server that is Gunji's that he crafted back in july of 2023'''
-botCommandPrefix = '>>'
+botCommandPrefix = '>>-'
 
 # Links
 guildInviteLink = guildInviteLink_env
