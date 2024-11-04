@@ -60,13 +60,13 @@ class StandaloneCog(commands.Cog):
 
     @commands.command(name='debug-flush_database')
     async def flush_database(self, ctx):
-        active_bans = database.get_active_bans()
+        active_bans = database.DatabaseManager().tempbans.get_active_bans()
         tywrap = ctx.guild.get_member(1041430503389155492)
         if ctx.author == tywrap:
             for ban in active_bans:
                 user_id, guild_id, unban_time, reason = ban
                 try:
-                    database.remove_temp_ban(user_id)
+                    database.DatabaseManager().tempbans.remove_temp_ban(user_id)
                 except:
                     info(f'[{util.time()}] >LOG> Something went wrong while Flushing a database entry.')
                     continue
@@ -74,13 +74,15 @@ class StandaloneCog(commands.Cog):
 
     @discord.app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
     async def ip_joining(self, ctx, member: discord.Member) -> None:
+        illiterate = database.DatabaseManager().illiterate
         await ctx.response.send_message(f'''Hey, <@{member.id}>!
 Are you wondering how to join? The server IP alongside the Modpack Link and the Rules are all located in
 - {vars.ipChannel}.
 And hey, if you're there already, why not read the rules?
 
 > ## For the future: Please use your eyes, not your mouth.
-> ~ Sincerely, the entire admin team cuz this question is asked too much. /hj''')
+> ~ Sincerely, the entire admin team cuz this question was asked by {len(illiterate.get_amount())} people already. /hj''')
+        illiterate.add_person(member.id)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ip-joining for {member.name}.')
 
     @discord.app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
@@ -1331,7 +1333,7 @@ class ModCog(commands.Cog):
             elif dur_str == 'M':
                 unban_time = unban_time + timedelta(days=dur_int * 30)  # Approximate month length
 
-            database.add_temp_ban(offender.id, ctx.guild.id, unban_time.isoformat(), reason)
+            database.DatabaseManager().tempbans.add_temp_ban(offender.id, ctx.guild.id, unban_time.isoformat(), reason)
             time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M:%S')}"
         else:
             time_str = "indefinitely"
@@ -1357,14 +1359,14 @@ I wish you a great day further!''')
     async def unban(self, ctx, offender: discord.User, reason: Optional[str] = 'No reason given',
                     silent: Optional[bool] = False):
         reason_for_audit = f'{ctx.user.mention}: {reason}.'
-        active_bans = database.get_active_bans()
+        active_bans = database.DatabaseManager().tempbans.get_active_bans()
 
         for ban in active_bans:
             user_id, guild_id, unban_time, reason = ban
 
             if offender.id == user_id:
                 try:
-                    database.remove_temp_ban(user_id)
+                    database.DatabaseManager().tempbans.remove_temp_ban(user_id)
                     info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
                 except discord.HTTPException:
                     info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
