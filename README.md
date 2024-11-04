@@ -1,4 +1,4 @@
-# CordCrafter is an advanced, multi-use bot I primarily made for GunjiCordia.
+# CordCrafter is an advanced, multi-use bot run on Python.
 > [!NOTE]
 This repo was made for Issue Trackers, and sharing the official release builds in separate folders, but as of 1.6.0, a `dev` package can now also be found in the root directory of the repo!  
 Said `dev` package is included in `CordCrafter Releases/...` as the patch number instead.  
@@ -13,7 +13,7 @@ A big example of this is the `Emojis` folder.
 This specific bot has a Privacy Notice, please check it out:  
 [CordCrafter Privacy Notice.](https://trusted-substance-f20.notion.site/CordCrafter-bot-Privacy-Notice-7d02fae4b3d64db4b90206b3d92fd9de)  
 By Joining GunjiCordia you agree to these terms.  
-When forking it is suggested to make a similar notice.
+When forking and using a modified version it is suggested to make a similar notice.
 
 ## For developers:
 Forking this repository is fully allowed, and fully promoted.  
