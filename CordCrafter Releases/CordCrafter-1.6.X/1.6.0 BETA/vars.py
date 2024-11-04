@@ -10,7 +10,6 @@ rcon_port_env = os.getenv('RCON_PORT')
 rcon_logger_webhook_url_env = os.getenv('RCON_LOGGER_WEBHOOK')
 sanitization_webhook_url_env = os.getenv('SAN_LOGGER_WEBHOOK')
 botToken_env = os.getenv("CORD_TOKEN")  # Interchangeable, please change for final release. For other devs: Use your own token.
-guildInviteLink_env = os.getenv("CORD_INVITE_LINK")
 log_filepath_w_env = os.getenv('WINDOWS_LOG_FILE_PATH')
 log_filepath_l_env = os.getenv('LINUX_LOG_FILE_PATH')
 
@@ -31,7 +30,7 @@ botDescription = '''This is a Bot made by Tywrap Studios for the GunjiCordia Dis
 botCommandPrefix = '>>'
 
 # Links
-guildInviteLink = guildInviteLink_env
+guildInviteLink = 'https://discord.gg/gunjicordia-1133093958889787475'
 privacy_notion = 'https://trusted-substance-f20.notion.site/CordCrafter-bot-Privacy-Notice-7d02fae4b3d64db4b90206b3d92fd9de'
 
 # Regex Patterns
