@@ -44,9 +44,9 @@ class CordBot(commands.Bot):
         info('Note that this version is a [BETA] version of the software. Use at your own risk!')
         info('Some features may not work as intended.')
         info('-------------------------------------------Init-------------------------------------------')
-        info('Cleaning old log files. . .')
+        info('Checking for old log files. . .')
         log_files = [f for f in os.listdir(vars.log_dir_path) if f.startswith('cordcrafter-')]
-        if len(log_files) > 10:
+        if len(log_files) > vars.max_log_files:
             log_files.sort()
             oldest_log = vars.log_dir_path + log_files[0]
             os.remove(oldest_log)

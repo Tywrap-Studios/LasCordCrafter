@@ -44,9 +44,9 @@ class CordBot(commands.Bot):
         info('Note that this version is a [BETA] version of the software. Use at your own risk!')
         info('Some features may not work as intended.')
         info('-------------------------------------------Init-------------------------------------------')
-        info('Cleaning old log files. . .')
+        info('Checking for old log files. . .')
         log_files = [f for f in os.listdir(vars.log_dir_path) if f.startswith('cordcrafter-')]
-        if len(log_files) > 10:
+        if len(log_files) > vars.max_log_files:
             log_files.sort()
             oldest_log = vars.log_dir_path + log_files[0]
             os.remove(oldest_log)
@@ -80,7 +80,7 @@ class CordBot(commands.Bot):
         os.makedirs('databases', exist_ok=True)
         info('Directory Initialized.')
         info('Initializing Database(s). . .')
-        database.init_db()
+        database.DatabaseManager.init_all(database.DatabaseManager())
         info('Database(s) Initialized.')
         info('-----------------------------------------Intents------------------------------------------')
         info('''Intents set:
@@ -128,7 +128,7 @@ class CordBot(commands.Bot):
 
     @discord_tasks.loop(minutes=1)
     async def check_temp_bans(self):
-        active_bans = database.get_active_bans()
+        active_bans = database.DatabaseManager().tempbans.get_active_bans()
         current_time = datetime.now()
 
         for ban in active_bans:
@@ -139,7 +139,7 @@ class CordBot(commands.Bot):
                 guild = self.get_guild(guild_id)
                 try:
                     await guild.unban(discord.Object(id=user_id), reason="Temporary ban expired")
-                    database.remove_temp_ban(user_id)
+                    database.DatabaseManager().tempbans.remove_temp_ban(user_id)
                     info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
                 except discord.HTTPException:
                     info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
@@ -160,7 +160,7 @@ async def bot_run():
         file.write(f'// Log file init at {util.time()}\n\n')
 
     async with ClientSession() as client:
-        # Intents
+        # Intents, do we need all em? NAHHHHH
         intents = discord.Intents.default()
         intents.members = True
         intents.dm_messages = True

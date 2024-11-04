@@ -14,8 +14,9 @@ guildInviteLink_env = os.getenv("CORD_INVITE_LINK")
 log_filepath_w_env = os.getenv('WINDOWS_LOG_FILE_PATH')
 log_filepath_l_env = os.getenv('LINUX_LOG_FILE_PATH')
 
-# File Stuff
+# Files Related
 log_dir_path = log_filepath_w_env  # Interchangeable
+max_log_files = 10  # Set as you wish
 
 # Webhooks
 sanitization_webhook_url = sanitization_webhook_url_env
