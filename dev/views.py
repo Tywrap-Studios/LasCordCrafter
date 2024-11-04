@@ -2,7 +2,6 @@ from datetime import date
 from datetime import datetime
 
 import discord
-from discord.ext import commands
 
 import util
 import vars
