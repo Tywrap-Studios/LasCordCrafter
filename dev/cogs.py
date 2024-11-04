@@ -87,20 +87,20 @@ And hey, if you're there already, why not read the rules?
 
     @discord.app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
     async def ping(self, ctx) -> None:
-        global latency_val
         latency = round(self.bot.latency * 1000)
+        latency_str = f'`{latency}ms`'
         if latency > 200 or latency == 200:
-            latency_val = f'`{latency}ms` <:con_bad:1278830871532802089>'
+            latency_str = f'`{latency}ms` <:con_bad:1278830871532802089>'
         else:
             if latency > 100 or latency == 100:
-                latency_val = f'`{latency}ms` <:con_mediocre:1278830874074546199>'
+                latency_str = f'`{latency}ms` <:con_mediocre:1278830874074546199>'
             else:
                 if latency < 100:
-                    latency_val = f'`{latency}ms` <:con_excellent:1278830872929501286>'
-        embed = discord.Embed(description=f'## Pong! {latency_val}', colour=discord.Colour.from_rgb(70, 230, 210))
+                    latency_str = f'`{latency}ms` <:con_excellent:1278830872929501286>'
+        embed = discord.Embed(description=f'## Pong! {latency_str}', colour=discord.Colour.from_rgb(70, 230, 210))
         embed.set_footer(text='Want to see more? Use /stats!', )
         await ctx.response.send_message(embed=embed)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ping -> {latency_val}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ping -> {latency_str}.')
 
     @discord.app_commands.command(name="bean", description="Beans the member. Yep. That's all it does.")
     async def bean(self, ctx, member: discord.Member):
@@ -114,7 +114,6 @@ And hey, if you're there already, why not read the rules?
     @discord.app_commands.command(name='stats', description='Displays the Bot\'s statistics.')
     async def stats(self, ctx) -> None:
         # Stats
-        global latency_val
         cpu_stat = psutil.cpu_percent(5)
         actual_ram = psutil.virtual_memory()[3] / 1000000
         rounded_ram = round(actual_ram)
@@ -124,19 +123,20 @@ And hey, if you're there already, why not read the rules?
             ram = f'{rounded_ram}MB'
         uptime = str(timedelta(seconds=int(round(time.time() - self.start_time))))
         latency = round(self.bot.latency * 1000)
+        latency_str = f'`{latency}ms`'
         if latency > 200 or latency == 200:
-            latency_val = f'`{latency}ms`<:con_bad:1278830871532802089>'
+            latency_str = f'`{latency}ms`<:con_bad:1278830871532802089>'
         else:
             if latency > 100 or latency == 100:
-                latency_val = f'`{latency}ms`<:con_mediocre:1278830874074546199>'
+                latency_str = f'`{latency}ms`<:con_mediocre:1278830874074546199>'
             else:
                 if latency < 100:
-                    latency_val = f'`{latency}ms`<:con_excellent:1278830872929501286>'
+                    latency_str = f'`{latency}ms`<:con_excellent:1278830872929501286>'
         member_count = len([m for m in ctx.guild.members if not m.bot])
         bot_count = len([m for m in ctx.guild.members if m.bot])
         guild_age_secs = time.time() - ctx.guild.created_at.timestamp()
         guild_age = round(guild_age_secs / 86400)
-        bot_member = ctx.guild.get_member_named(vars.botName)
+        bot_member = self.bot
         bot_status_game = bot_member.activity.name
         bot_status_raw = bot_member.activity
         if 'on CordCraft' in bot_status_game:
@@ -144,12 +144,12 @@ And hey, if you're there already, why not read the rules?
         else:
             if '; DOWN' in bot_status_raw.state:
                 message = bot_status_raw.state.replace('; DOWN', '')
-                bot_status = f'**The server is currently __down__.** <a:down:1278830877396172840>\n<:arrow_under:1278834153655107646>**Message:** {message}'
+                bot_status = f'**The server might currently be __down__.** <a:down:1278830877396172840>\n<:arrow_under:1278834153655107646>**Message:** {message}'
             else:
                 bot_status = f'**There might be a slight complication.** <a:unstable:1278830948120789064>\n<:arrow_under:1278834153655107646>**Message:** {bot_status_raw.state}'
         status_embed = discord.Embed(colour=discord.Colour.from_rgb(70, 230, 210), title='CordCrafter Status.',
                                      description=f'''----------------------------
-<:space:1251655233919123628><:speed:1251649973418983565> **Latency:** {latency_val}
+<:space:1251655233919123628><:speed:1251649973418983565> **Latency:** {latency_str}
 <:space:1251655233919123628><:uptime:1251648456301346946> **Uptime:** `{uptime}`
 <:space:1251655233919123628><:info:1278823933717512232> **Bot Ver:** `{vars.botVersion}`
 <:space:1251655233919123628><:resources:1278835693900136532> **Resource Usage:**
@@ -164,7 +164,7 @@ And hey, if you're there already, why not read the rules?
 **<:minecraft_logo:1278852452396826634> MC-Server Status:**
 <:arrow_under:1278834153655107646>{bot_status}''')
         await ctx.response.send_message(embed=status_embed)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /stats -> {latency_val}.')
+        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /stats -> {latency_str}.')
 
     @discord.app_commands.command(name='resign', description='Resigns the Minecraft admin you chose.')
     async def resign(self, ctx, admin: discord.Member):
@@ -245,30 +245,30 @@ And hey, if you're there already, why not read the rules?
         await ctx.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {ctx.user.name} ran /credits.')
 
-        async def cog_app_command_error(interaction, error):
-            if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
-                await interaction.response.send_message(
+    async def cog_app_command_error(self, interaction, error):
+        if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message(
                     f'You are on cooldown. Please wait {error.retry_after:.2f} seconds.', ephemeral=True)
-                raise error
-            elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
-                await interaction.response.send_message(
+            raise error
+        elif isinstance(error, discord.app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
                     f'I do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
                     ephemeral=True)
-                raise error
-            elif isinstance(error, discord.app_commands.errors.MissingPermissions):
-                await interaction.response.send_message(
+            raise error
+        elif isinstance(error, discord.app_commands.errors.MissingPermissions):
+            await interaction.response.send_message(
                     f'You do not have the required permissions to run this command.\nMissing Permissions: {error.missing_permissions}',
                     ephemeral=True)
-                raise error
-            elif isinstance(error, discord.app_commands.errors.HTTPException):
-                await interaction.response.send_message(
+            raise error
+        elif isinstance(error, discord.app_commands.errors.HTTPException):
+            await interaction.response.send_message(
                     f'An HTTPException was raised while executing this command.\nError: {error}', ephemeral=True)
-                raise error
-            else:
-                await interaction.response.send_message(
+            raise error
+        else:
+            await interaction.response.send_message(
                     f'Something unexpected happened while handling this command.\nStandaloneCogError: {error}',
                     ephemeral=True)
-                raise error
+            raise error
 
 
 class AppealServiceCog(commands.Cog):
@@ -459,7 +459,7 @@ class ClaimCog(commands.Cog):
         else:
             mention_text = mention.mention
         description = '''
- 1. Press "`M`" (Might need to rebind: Press "esc">Options>Control>Keybinds>"open world map") to open up the world map
+ 1. Press "`M`" (Might need to rebind: Press "esc">Options>Control>Keybinds>"open world map") to open the world map
 2. Right-click-drag over the area You want to claim. 
 3. In the popup: Click "Claim selected"
 '''
@@ -495,7 +495,7 @@ This means that anyone in a party you're in, has those perms.
 **How to...**
 > - ...*Invite* people to your party: Run in game `openpac-parties member invite <username>`
 > - ...*Kick* people from your party: Run in game `openpac-parties member kick <username>`
-> - ...*Delete* your party: Run in game `openpac-parties destroy confirm`
+> - ...*Delete* your party: Run in game `openpac-parties destroy confirm`.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:party:1278816948846596157> Party Creation:',
                               description=description)
@@ -528,8 +528,8 @@ This means that anyone in a party you're in, has those perms.
         description = '''Alongside giving Party members perms in your claims, you can also Ally another party to get specific claim perms for them as well!
 
 **How to...**
-> - ...*Ally* parties: Run in game `/openpac-parties ally add <username of party owner>`
-> - ...*Unally* parties: Run in game `/openpac-parties ally remove <username of party owner>`
+> - ...*Ally* parties: Run in game `/openpac-parties ally add <username of party owner>`.
+> - ...*Unally* parties: Run in game `/openpac-parties ally remove <username of party owner>`.
 
 > <:info:1278823933717512232> **NOTES:**
 > Allying a party does not give you perms to their claims, they need to ally you on their own as well!
@@ -552,7 +552,7 @@ This means that anyone in a party you're in, has those perms.
 **How to...**
 > - ...*Transfer* party ownership: Run in game `/openpac-parties transfer <username> confirm`
 > - <:info:1278823933717512232> The user has to be in the party for this to work.
-> - <:warn:1249069667159638206> This action is irreversible unless the new owner re-transfers back to you
+> - <:warn:1249069667159638206> This action is irreversible unless the new owner re-transfers back to you.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:party_owner:1278830882828062802> Allies:',
                               description=description)
@@ -581,7 +581,7 @@ This means that anyone in a party you're in, has those perms.
             mention_text = ''
         else:
             mention_text = mention.mention
-        description = '''To specify which perms are given to who, you are provided an in game config screen.
+        description = '''To specify which perms are given to whom, you are provided an in game config screen.
 1. Press "`'`" (Might need to rebind: Press "esc">Options>Controls>Keybinds>"Open Parties and Claims Menu")
 2. In the Menu: Player Config menu > My Player Config.
 3. Set the perms you want your friend to have to something related to "party" or "party only", etc.
@@ -637,7 +637,7 @@ class NotesCog(commands.Cog):
         description = '''> Sorry but we do not allow cracked or unofficial accounts to join our server.
 > This is because it can get both the Discord and Minecraft server in a lot of trouble.
 
-> Furthermore it is illegal to Pirate games. We can report your message to Discord and it can in turn get *you* in trouble.
+> Furthermore it is illegal to Pirate games. We can report your message to Discord, and it can in turn get *you* in trouble.
 
 <:info:1278823933717512232> You can buy the official game [here](<https://www.minecraft.net/en-us/store/minecraft-java-bedrock-edition-pc>)
 <:warn:1249069667159638206> **ALSO PLEASE, PLEASE NOTE THAT MOST CRACKED/ILLEGAL LAUNCHERS __VERY__ OFTEN DUB AS [SPYWARE, ADWARE, DISCOVERERS, PERSISTS, STEALERS AND PRIVILEGE ESCALATORS.](<https://tria.ge/241021-n5b91ssgpf>)**
@@ -707,7 +707,7 @@ Please note that some knowledge about the `cd` command, and cmd in general, is t
             mention_text = ''
         else:
             mention_text = mention.mention
-        description = '''The binary search is a way of finding a faulty thing amongst a lot of other things, without having to remove the things one-by-one. This is useful for finding a broken mod among hundreds of mods, without having to spend time testing the mods one-by-one.
+        description = '''The binary search is a way of finding a faulty thing amongst a lot of other things, without having to remove the things one-by-one. This is useful for finding a broken mod amongst hundreds of mods, without having to spend time testing the mods one-by-one.
 
 > **This is how it goes:**
 > 1. Remove half of the existing things, and put them aside somewhere where they are not affected by or affecting anything.
@@ -824,7 +824,7 @@ class CmdCog(commands.Cog):
         command = f'/logtellraw targetless "{info}"'
         await send_rcon(command, ctx, True)
 
-    @cmd.command(name='mclogs', description='Sends a request to mclo.gs for the latest.log or a log you specify.')
+    @cmd.command(name='mclogs', description='Sends a request to mclo.gs for the latest.log, or a log you specify.')
     async def sub_command(self, ctx, log: Optional[str]):
         if log is None:
             file = ''
