@@ -8,7 +8,7 @@ from typing import Optional
 import discord
 from aiohttp import ClientSession
 from discord.ext import commands
-from discord.ext import tasks as discord_tasks
+from discord.ext import tasks
 
 import database
 import vars
@@ -115,7 +115,7 @@ class CordBot(commands.Bot):
     def get(self):
         return self
 
-    @discord_tasks.loop(hours=4)
+    @tasks.loop(hours=4)
     async def post_bump(self):
         forum = self.get_channel(vars.team_forum)
         forum_posts = forum.threads
@@ -126,7 +126,7 @@ class CordBot(commands.Bot):
                 await msg.delete()
         info(f'[{util.time()}] >LOG> #{forum.name} posts bumped.')
 
-    @discord_tasks.loop(minutes=1)
+    @tasks.loop(minutes=1)
     async def check_temp_bans(self):
         active_bans = database.DatabaseManager().tempbans.get_active_bans()
         current_time = datetime.now()

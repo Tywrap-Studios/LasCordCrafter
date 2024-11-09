@@ -628,6 +628,26 @@ class NotesCog(commands.Cog):
 
     notes = app_commands.Group(name='notes', description='Notes about random stuff.')
 
+    @notes.command(name='schematics', description='Explains the fuzz about schematics.')
+    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+        if mention is None:
+            mention_text = ''
+        else:
+            mention_text = mention.mention
+        description = '''We've disabled Create's Schematic feature because of the following reasons:
+> - It's a little too OP. We'd love you to actually play the game instead of downloading a file and just watching it build. 
+> - They cause a ton of strain on the server because of the way they're rendered and loaded. Plus your schematic file gets uploaded to the physical server, and this can unnecessarily take up storage space.
+> - We believe that in general that having something just build stuff for you seems unethical and uncreative.
+
+
+> <:info:1278823933717512232> We understand that you'd still want a way to transfer over builds you made in creative, and this basically blew that opportunity away.
+> If you want a way to port over Creative builds: We suggest [Litematica](<https://www.curseforge.com/minecraft/mc-mods/litematica/files/4626718>).'''
+
+        embed = discord.Embed(colour=discord.Colour.blurple(),
+                          title='<:list:1279213268082229381> Create\'s Schematics', description=description)
+        await ctx.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes schematics for {mention}.')
+
     @notes.command(name='cracked', description='Explains the fuzz about Cracked accounts.')
     async def sub_command(self, ctx, mention: Optional[discord.Member]):
         if mention is None:
