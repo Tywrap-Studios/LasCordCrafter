@@ -73,9 +73,9 @@ class StandaloneCog(commands.Cog):
         info(f'[{util.time()}] >LOG> {ctx.author.name} Attempted to flush database.')
 
     @discord.app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
-    async def ip_joining(self, ctx, member: discord.Member) -> None:
+    async def ip_joining(self, interaction, member: discord.Member) -> None:
         illiterate = database.DatabaseManager().illiterate
-        await ctx.response.send_message(f'''Hey, <@{member.id}>!
+        await interaction.response.send_message(f'''Hey, <@{member.id}>!
 Are you wondering how to join? The server IP alongside the Modpack Link and the Rules are all located in
 - {vars.ipChannel}.
 And hey, if you're there already, why not read the rules?
@@ -83,10 +83,11 @@ And hey, if you're there already, why not read the rules?
 > ## For the future: Please use your eyes, not your mouth.
 > ~ Sincerely, the entire admin team cuz this question was asked by {len(illiterate.get_amount())} people already. /hj''')
         illiterate.add_person(member.id)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ip-joining for {member.name}.')
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /ip-joining for {member.name}.')
 
     @discord.app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
-    async def ping(self, ctx) -> None:
+    async def ping(self, interaction) -> None:
+        await interaction.response.defer()
         latency = round(self.bot.latency * 1000)
         latency_str = f'`{latency}ms`'
         if latency > 200 or latency == 200:
@@ -99,20 +100,20 @@ And hey, if you're there already, why not read the rules?
                     latency_str = f'`{latency}ms` <:con_excellent:1278830872929501286>'
         embed = discord.Embed(description=f'## Pong! {latency_str}', colour=discord.Colour.from_rgb(70, 230, 210))
         embed.set_footer(text='Want to see more? Use /stats!', )
-        await ctx.response.send_message(embed=embed)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /ping -> {latency_str}.')
+        await interaction.followup.send(embed=embed)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /ping -> {latency_str}.')
 
     @discord.app_commands.command(name="bean", description="Beans the member. Yep. That's all it does.")
-    async def bean(self, ctx, member: discord.Member):
+    async def bean(self, interaction, member: discord.Member):
         embed = discord.Embed(title='Member Beaned',
-                              description=f'Member: {member.mention},\nResponsible "moderator": {ctx.user.mention}',
+                              description=f'Member: {member.mention},\nResponsible "moderator": {interaction.user.mention}',
                               colour=discord.Colour.og_blurple())
-        await ctx.response.send_message(embed=embed)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /bean for {member.name}.')
+        await interaction.response.send_message(embed=embed)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /bean for {member.name}.')
 
     # noinspection SpellCheckingInspection
     @discord.app_commands.command(name='stats', description='Displays the Bot\'s statistics.')
-    async def stats(self, ctx) -> None:
+    async def stats(self, interaction) -> None:
         # Stats
         cpu_stat = psutil.cpu_percent(5)
         actual_ram = psutil.virtual_memory()[3] / 1000000
@@ -132,9 +133,9 @@ And hey, if you're there already, why not read the rules?
             else:
                 if latency < 100:
                     latency_str = f'`{latency}ms`<:con_excellent:1278830872929501286>'
-        member_count = len([m for m in ctx.guild.members if not m.bot])
-        bot_count = len([m for m in ctx.guild.members if m.bot])
-        guild_age_secs = time.time() - ctx.guild.created_at.timestamp()
+        member_count = len([m for m in interaction.guild.members if not m.bot])
+        bot_count = len([m for m in interaction.guild.members if m.bot])
+        guild_age_secs = time.time() - interaction.guild.created_at.timestamp()
         guild_age = round(guild_age_secs / 86400)
         bot_member = self.bot
         bot_status_game = bot_member.activity.name
@@ -163,53 +164,53 @@ And hey, if you're there already, why not read the rules?
 ----------------------------
 **<:minecraft_logo:1278852452396826634> MC-Server Status:**
 <:arrow_under:1278834153655107646>{bot_status}''')
-        await ctx.response.send_message(embed=status_embed)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /stats -> {latency_str}.')
+        await interaction.response.send_message(embed=status_embed)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /stats -> {latency_str}.')
 
     @discord.app_commands.command(name='resign', description='Resigns the Minecraft admin you chose.')
-    async def resign(self, ctx, admin: discord.Member):
-        tywrap = ctx.guild.get_member(1041430503389155492)
-        old_role = ctx.guild.get_role(vars.minecraftAdmin)
-        new_role = ctx.guild.get_role(vars.resigned)
-        if ctx.user == tywrap:
+    async def resign(self, interaction, admin: discord.Member):
+        tywrap = interaction.guild.get_member(1041430503389155492)
+        old_role = interaction.guild.get_role(vars.minecraftAdmin)
+        new_role = interaction.guild.get_role(vars.resigned)
+        if interaction.user == tywrap:
             if old_role in admin.roles and new_role not in admin.roles:
                 await admin.remove_roles(old_role, reason='Resigning Minecraft Admin...')
                 await admin.add_roles(new_role, reason='Resigning Minecraft Admin...')
-                await ctx.response.send_message(
+                await interaction.response.send_message(
                     f'Successfully resigned {admin.mention} from the Admin team.\nDon\'t forget to /deop them!',
                     ephemeral=True)
             else:
                 if old_role not in admin.roles and new_role not in admin.roles:
-                    await ctx.response.send_message(
+                    await interaction.response.send_message(
                         f'Could not resign Admin {admin.mention}. \nReason: Could not find {old_role.mention} role in User roles.',
                         ephemeral=True)
                 if old_role not in admin.roles and new_role in admin.roles:
-                    await ctx.response.send_message(
+                    await interaction.response.send_message(
                         f'Could not resign Admin {admin.mention}. \nReason: User is already resigned.', ephemeral=True)
                 if old_role in admin.roles and new_role in admin.roles:
-                    await ctx.response.send_message(
+                    await interaction.response.send_message(
                         f'Something went wrong while assigning and resigning roles.\nPlease manually re-check {admin.mention}\'s roles',
                         ephemeral=True)
         else:
-            await ctx.response.send_message('You do not have the permission to send this command.', ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /resign for {admin.name}.')
+            await interaction.response.send_message('You do not have the permission to send this command.', ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /resign for {admin.name}.')
 
     @discord.app_commands.command(name='say', description='Says stuff as the bot')
     @discord.app_commands.checks.has_permissions(administrator=True)
-    async def say(self, ctx, text: str, reference: Optional[str]):
+    async def say(self, interaction, text: str, reference: Optional[str]):
         if reference is not None:
             reference_int = int(reference)
-            reference_m = await ctx.channel.fetch_message(reference_int)
+            reference_m = await interaction.channel.fetch_message(reference_int)
             await reference_m.reply(text)
-            await ctx.response.send_message(content=f'Sent {text}', ephemeral=True)
+            await interaction.response.send_message(content=f'Sent {text}', ephemeral=True)
         else:
-            await ctx.channel.send(content=text)
-            await ctx.response.send_message(content=f'Sent {text}', ephemeral=True)
+            await interaction.channel.send(content=text)
+            await interaction.response.send_message(content=f'Sent {text}', ephemeral=True)
         info(f'[{util.time()}] >LOG> {text}.')
 
     # noinspection SpellCheckingInspection
     @discord.app_commands.command(name='credits', description='Displays Credits for the bot.')
-    async def credits(self, ctx):
+    async def credits(self, interaction):
         description = f'''<:resources:1278835693900136532> **Coding:**
 <:arrow_under:1278834153655107646> Tiazzz -- On [GitHub](<https://github.com/TywrapStudios>)
 
@@ -242,8 +243,8 @@ And hey, if you're there already, why not read the rules?
     '''
         embed = discord.Embed(colour=discord.Colour.teal(), title='<:list:1279213268082229381> Credits:',
                               description=description)
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /credits.')
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /credits.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -277,78 +278,78 @@ class AppealServiceCog(commands.Cog):
 
     @discord.app_commands.command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
     @discord.app_commands.checks.has_permissions(administrator=True)
-    async def setup(self, ctx, channel: discord.TextChannel):
+    async def setup(self, interaction, channel: discord.TextChannel):
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
                               description='By using the command **/appeal**, a Private Channel can be made for your Appeal.')
         await channel.send(embed=embed,
                            content='Opening a ban appeal or ticket will ping the `@Minecraft Admin` role, so please do NOT ping them again in the ticket yourself!\nThanks in advance!')
-        await ctx.response.send_message(
+        await interaction.response.send_message(
             content=f'Setup Completed in {channel.mention}.\nMake sure to delete any leftovers.', ephemeral=True)
-        info(f'[{util.time()}] >LOG> Setup Completed in #{channel.name} by {ctx.user.name}.')
+        info(f'[{util.time()}] >LOG> Setup Completed in #{channel.name} by {interaction.user.name}.')
 
     @discord.app_commands.command(name='appeal', description='Manually appeals a Minecraft Ban Appeal ticket.')
-    async def appeal(self, ctx):
+    async def appeal(self, interaction):
         view = views.ManualAppealButton()
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
                               description='By clicking the button below, a Private Channel will be made for your Appeal.')
-        await ctx.response.send_message(view=view, embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} ran /appeal.')
+        await interaction.response.send_message(view=view, embed=embed, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /appeal.')
 
     @discord.app_commands.command(name='add', description='Adds a user to the current ticket.')
-    async def add(self, ctx, member: discord.Member):
-        if "ban-appeal-" in ctx.channel.name and member != ctx.user:
-            await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
+    async def add(self, interaction, member: discord.Member):
+        if "ban-appeal-" in interaction.channel.name and member != interaction.user:
+            await interaction.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
                                               embed_links=True)
             view = views.RemoveButton(member=member)
-            ping = await ctx.channel.send(f'{member.mention}')
+            ping = await interaction.channel.send(f'{member.mention}')
             await ping.delete()
             embed = discord.Embed(title='Member Add',
-                                  description=f"{member.mention} has been added to the ticket by {ctx.user.mention}.",
+                                  description=f"{member.mention} has been added to the ticket by {interaction.user.mention}.",
                                   colour=discord.Colour.dark_gray())
-            await ctx.response.send_message(embed=embed, view=view)
-            info(f'[{util.time()}] >LOG> {ctx.user.name} added {member.name} to {ctx.channel.name}.')
+            await interaction.response.send_message(embed=embed, view=view)
+            info(f'[{util.time()}] >LOG> {interaction.user.name} added {member.name} to {interaction.channel.name}.')
         else:
-            if "ban-appeal-" not in ctx.channel.name:
-                await ctx.response.send_message("This isn't a ticket!", ephemeral=True)
+            if "ban-appeal-" not in interaction.channel.name:
+                await interaction.response.send_message("This isn't a ticket!", ephemeral=True)
             else:
-                if member == ctx.user:
-                    await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
+                if member == interaction.user:
+                    await interaction.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
     @discord.app_commands.command(name='remove', description='Removes a user from the current ticket.')
-    async def remove(self, ctx, member: discord.Member):
-        if "ban-appeal-" in ctx.channel.name and member != ctx.user:
-            await ctx.channel.set_permissions(member, overwrite=None)
+    async def remove(self, interaction, member: discord.Member):
+        if "ban-appeal-" in interaction.channel.name and member != interaction.user:
+            await interaction.channel.set_permissions(member, overwrite=None)
             embed = discord.Embed(title='Member Remove',
-                                  description=f"{member.mention} has been removed from the ticket by {ctx.user.mention}.",
+                                  description=f"{member.mention} has been removed from the ticket by {interaction.user.mention}.",
                                   colour=discord.Colour.dark_gray())
-            await ctx.response.send_message(embed=embed)
-            info(f'[{util.time()}] >LOG> {ctx.user.name} removed {member.name} from {ctx.channel.name}.')
+            await interaction.response.send_message(embed=embed)
+            info(f'[{util.time()}] >LOG> {interaction.user.name} removed {member.name} from {interaction.channel.name}.')
         else:
-            if "ban-appeal-" not in ctx.channel.name:
-                await ctx.response.send_message("This isn't a ticket!", ephemeral=True)
+            if "ban-appeal-" not in interaction.channel.name:
+                await interaction.response.send_message("This isn't a ticket!", ephemeral=True)
             else:
-                if member == ctx.user:
-                    await ctx.response.send_message("You can't add or remove yourself!", ephemeral=True)
+                if member == interaction.user:
+                    await interaction.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
     @discord.app_commands.command(name='close', description='Closes the ticket.')
-    async def close(self, ctx):
+    async def close(self, interaction):
         embed = discord.Embed(title='Confirm',
                               description='Please confirm that you want to close your Ban Appeal Ticket.',
                               colour=discord.Colour.green())
         view = views.ConfirmButton()
-        await ctx.response.send_message(embed=embed, view=view, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} closed {ctx.channel.name}.')
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} closed {interaction.channel.name}.')
 
     @discord.app_commands.command(name='forceclose', description='Forcefully closes the selected ticket.')
-    async def forceclose(self, ctx, ticket: discord.TextChannel):
-        allowedrole1 = ctx.guild.get_role(vars.discordAdmin)
-        allowedrole2 = ctx.guild.get_role(vars.minecraftAdmin)
-        if allowedrole1 in ctx.user.roles or allowedrole2 in ctx.user.roles:
+    async def forceclose(self, interaction, ticket: discord.TextChannel):
+        allowedrole1 = interaction.guild.get_role(vars.discordAdmin)
+        allowedrole2 = interaction.guild.get_role(vars.minecraftAdmin)
+        if allowedrole1 in interaction.user.roles or allowedrole2 in interaction.user.roles:
             if "ban-appeal-" in ticket.name:
-                ticket_log_channel = ctx.guild.get_channel(1164581289022722148)
+                ticket_log_channel = interaction.guild.get_channel(1164581289022722148)
                 opname = ticket.name.replace('ban-appeal-', '')
-                op = ctx.guild.get_member_named(opname)
-                closer = ctx.user
+                op = interaction.guild.get_member_named(opname)
+                closer = interaction.user
                 embed = discord.Embed(title='Ban Appeal Closed', description=f'''
 <:id:1279190510027800709> **Ticket Opened by:**
 <:asterix:1279190506777088000> {op.mention}
@@ -359,15 +360,15 @@ class AppealServiceCog(commands.Cog):
                 time = datetime.now().strftime('%H:%M')
                 datetoday = date.today().strftime('%d/%m/%Y')
                 embed.set_footer(text=f'{datetoday} {time}')
-                await ticket.delete(reason=f'{ctx.user} wanted to force close {ticket}')
+                await ticket.delete(reason=f'{interaction.user} wanted to force close {ticket}')
                 await ticket_log_channel.send(embed=embed)
-                await ctx.response.send_message(f'Force closed {ticket.mention}', ephemeral=True)
-                info(f'[{util.time()}] >LOG> {ctx.user.name} force closed {ctx.channel.name}.')
+                await interaction.response.send_message(f'Force closed {ticket.mention}', ephemeral=True)
+                info(f'[{util.time()}] >LOG> {interaction.user.name} force closed {interaction.channel.name}.')
             else:
                 if "ban-appeal-" not in ticket.name:
-                    await ctx.response.send_message("That TextChannel isn't a ticket!", ephemeral=True)
+                    await interaction.response.send_message("That TextChannel isn't a ticket!", ephemeral=True)
         else:
-            await ctx.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
+            await interaction.response.send_message(f'You do not have the permissions to send this command.', ephemeral=True)
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -398,23 +399,23 @@ class AppealServiceCog(commands.Cog):
 class SanitizeServiceCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.ctx_menu = discord.app_commands.ContextMenu(
+        self.interaction_menu = discord.app_commands.ContextMenu(
             name='Sanitize & Dehoist',
-            callback=self.sanitize_ctx_menu_callback
+            callback=self.sanitize_interaction_menu_callback
         )
-        self.bot.tree.add_command(self.ctx_menu)
+        self.bot.tree.add_command(self.interaction_menu)
 
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
-    async def sanitize_ctx_menu_callback(self, ctx: discord.Interaction, member: discord.Member):
-        await util.sanitize(ctx, member)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sanitized {member.name} using a Context Menu.')
+    async def sanitize_interaction_menu_callback(self, interaction: discord.Interaction, member: discord.Member):
+        await util.sanitize(interaction, member)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sanitized {member.name} using a Context Menu.')
 
     @discord.app_commands.command(name='sanitize',
                                   description='Sanitizes and Dehoists the member\'s Nick using Regex Patterns.')
     @discord.app_commands.checks.has_permissions(manage_nicknames=True)
-    async def sanitize(self, ctx, member: discord.Member):
-        await util.sanitize(ctx, member)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sanitized {member.name} using a command.]')
+    async def sanitize(self, interaction, member: discord.Member):
+        await util.sanitize(interaction, member)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sanitized {member.name} using a command.]')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -453,7 +454,7 @@ class ClaimCog(commands.Cog):
     claim = app_commands.Group(name='claims', description='Info about the claim system.')
 
     @claim.command(name='claiming', description='How to claim a piece of land.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -465,11 +466,11 @@ class ClaimCog(commands.Cog):
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:claim:1278815499349786704> Claiming Chunks:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims claiming for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims claiming for {mention.name}.')
 
     @claim.command(name='party', description='What are Parties?')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -479,11 +480,11 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:party:1278816948846596157> Parties:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims party for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims party for {mention.name}.')
 
     @claim.command(name='party-creation', description='How to create a Party and add people to it.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -499,11 +500,11 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:party:1278816948846596157> Party Creation:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims party-creation for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims party-creation for {mention.name}.')
 
     @claim.command(name='party-misc', description='Misc in Parties.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -516,11 +517,11 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:party:1278816948846596157> Party Misc:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims party-misc for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims party-misc for {mention.name}.')
 
     @claim.command(name='party-ally', description='How Allies work.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -538,11 +539,11 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:ally:1278823662589313045> Allies:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims party-ally for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims party-ally for {mention.name}.')
 
     @claim.command(name='party-ownership', description='How Ownership works.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -556,11 +557,11 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:party_owner:1278830882828062802> Allies:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims party-ownership for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims party-ownership for {mention.name}.')
 
     @claim.command(name='config', description='How to use the config.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -572,11 +573,11 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:config:1278820765797580921> Config:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims config for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims config for {mention.name}.')
 
     @claim.command(name='perms', description='How do I give players perms on my claim?')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -589,8 +590,8 @@ This means that anyone in a party you're in, has those perms.
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:perms:1278838464456032388> Perms:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /claims perms for {mention.name}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /claims perms for {mention.name}.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -629,7 +630,7 @@ class NotesCog(commands.Cog):
     notes = app_commands.Group(name='notes', description='Notes about random stuff.')
 
     @notes.command(name='schematics', description='Explains the fuzz about schematics.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -645,11 +646,11 @@ class NotesCog(commands.Cog):
 
         embed = discord.Embed(colour=discord.Colour.blurple(),
                           title='<:list:1279213268082229381> Create\'s Schematics', description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes schematics for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes schematics for {mention}.')
 
     @notes.command(name='cracked', description='Explains the fuzz about Cracked accounts.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -664,11 +665,11 @@ class NotesCog(commands.Cog):
 **WE SUGGEST CLEANSING THEM! NOT JUST FOR YOUR OWN (ONLINE) SAFETY, BUT ALSO FOR OTHERS WHO USE THE SAME DEVICE.**'''
         embed = discord.Embed(colour=discord.Colour.blurple(),
                               title='<:against_rules:1279142167729668096> Cracked Instances:', description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes cracked for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes cracked for {mention}.')
 
     @notes.command(name='bedrock', description='Explains the fuzz about Bedrock accounts.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -682,11 +683,11 @@ class NotesCog(commands.Cog):
         embed = discord.Embed(colour=discord.Colour.blurple(),
                               title='<:bedrock:1279144625168191598> Bedrock Instances:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes bedrock for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes bedrock for {mention}.')
 
     @notes.command(name='zip-import', description='How to manually import modpacks using Zip-Files.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -700,11 +701,11 @@ class NotesCog(commands.Cog):
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:download:1279148597094514698> Zip-Importing:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes zip-import for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes zip-import for {mention}.')
 
     @notes.command(name='modlist', description='How to make a modlist.txt file using command prompt.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -718,11 +719,11 @@ Please note that some knowledge about the `cd` command, and cmd in general, is t
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), title='<:perms:1278838464456032388> Modlist:',
                               description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes modlist for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes modlist for {mention}.')
 
     @notes.command(name='binary-search', description='How to perform a binary-search instead of a sequential-search')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -743,11 +744,11 @@ Please note that some knowledge about the `cd` command, and cmd in general, is t
                               description=description)
         embed.set_image(
             url='https://media.discordapp.net/attachments/1249069998148812930/1279156096103354448/binary_search.gif?ex=66d36a72&is=66d218f2&hm=b7dd480dfb0d4da00a1359d15ca47a0540a8de18bbe6ff8d8baf1bf0a5301788&=&width=480&height=319')
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes binary-search for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes binary-search for {mention}.')
 
     @notes.command(name='provider', description='What server provider do we use?')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -766,11 +767,11 @@ Without them we would now be nothing :purple_heart:
                               description=description)
         embed.set_footer(text='https://centralhosting.au/central-hosting/',
                          icon_url='https://media.discordapp.net/attachments/1249069998148812930/1279200313345310741/central_hosting_au.png?ex=66d393a1&is=66d24221&hm=0c085589b8c90653db1aca21932b391e33d68330adc9c44de889a21dc60a029b&=&format=webp&quality=lossless&width=450&height=450')
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes provider for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes provider for {mention}.')
 
     @notes.command(name='dontasktoask', description='Don\'t ask to ask. Just ask.')
-    async def sub_command(self, ctx, mention: Optional[discord.Member]):
+    async def sub_command(self, interaction, mention: Optional[discord.Member]):
         if mention is None:
             mention_text = ''
         else:
@@ -795,8 +796,8 @@ Remember, **be clear** about what you need **as soon as possible.**
 -# Credits to [jkhub.org's "Don't Ask to ask, just Ask." page](https://jkhub.org/dontasktoask/)
 '''
         embed = discord.Embed(colour=discord.Colour.blurple(), description=description)
-        await ctx.response.send_message(embed=embed, content=mention_text)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /notes dontasktoask for {mention}.')
+        await interaction.response.send_message(embed=embed, content=mention_text)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /notes dontasktoask for {mention}.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -835,44 +836,44 @@ class CmdCog(commands.Cog):
     cmd = app_commands.Group(name='cmd', description='Send commands to the Minecraft server.')
 
     @cmd.command(name='tellraw', description='Says something in the MC Server.')
-    async def sub_command(self, ctx, content: str) -> None:
+    async def sub_command(self, interaction, content: str) -> None:
         command = f'/tellraw @a "{content}"'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='log', description='Logs your phrase to the Console.')
-    async def sub_command(self, ctx, info: str):
+    async def sub_command(self, interaction, info: str):
         command = f'/logtellraw targetless "{info}"'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='mclogs', description='Sends a request to mclo.gs for the latest.log, or a log you specify.')
-    async def sub_command(self, ctx, log: Optional[str]):
+    async def sub_command(self, interaction, log: Optional[str]):
         if log is None:
             file = ''
         else:
             file = f' share {log}'
         command = f'/mclogs{file}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='maintenance', description='Allows you to Toggle Maintenance.')
-    async def sub_command(self, ctx, enabled: bool):
+    async def sub_command(self, interaction, enabled: bool):
         if enabled is True:
             arg = ' on'
         else:
             arg = ' off'
         command = f'/maintenance{arg}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='ban', description='Bans the selected player from the server.')
-    async def sub_command(self, ctx, player_user: str, reason: Optional[str]):
+    async def sub_command(self, interaction, player_user: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
         else:
             reason1 = f' {reason}'
         command = f'/ban {player_user}{reason1}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='tempban', description='Temporarily Bans the selected player from the server.')
-    async def sub_command(self, ctx, player_user: str, duration: str, reason: Optional[str]):
+    async def sub_command(self, interaction, player_user: str, duration: str, reason: Optional[str]):
         duration_v2 = util.format_duration(duration)
         if reason is None:
             reason1 = ''
@@ -880,135 +881,135 @@ class CmdCog(commands.Cog):
             reason1 = f' {reason}'
         if re.match(vars.duregex, duration_v2):
             command = f'/tempban {player_user} {duration_v2}{reason1}'
-            await send_rcon(command, ctx, True)
+            await send_rcon(command, interaction, True)
         else:
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'<:warn:1249069667159638206> `{duration}` does not seem like a valid duration type even when corrected to `{duration_v2}` by our system!\n\n> <:info:1278823933717512232> A correct syntax would be: <number><either s, m, d or w> (e.g. 1w for 1 week.)\n> If you think it should actually be correct, please report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and show this Embed in e.g. a screenshot.\n-# {vars.botVersion}',
                                   title='RCON: <:resources:1278835693900136532>')
-            await ctx.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @cmd.command(name='ban-ip', description='IP Bans the selected player from the server.')
-    async def sub_command(self, ctx):
+    async def sub_command(self, interaction):
         embed = discord.Embed(colour=discord.Colour.red(),
                               description='<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in game.\n-# `Error Code 423`',
                               title='RCON: <:resources:1278835693900136532>')
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /ban-ip.')
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /ban-ip.')
 
     @cmd.command(name='tempban-ip', description='IP Bans the selected player from the server.')
-    async def sub_command(self, ctx):
+    async def sub_command(self, interaction):
         embed = discord.Embed(colour=discord.Colour.red(),
                               description='<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in game.\n-# `Error Code 423`',
                               title='RCON: <:resources:1278835693900136532>')
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} sent /tempban-ip.')
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} sent /tempban-ip.')
 
     @cmd.command(name='unban', description='Unbans the selected player from the server.')
-    async def sub_command(self, ctx, player_user: str, reason: Optional[str]):
+    async def sub_command(self, interaction, player_user: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
         else:
             reason1 = f' {reason}'
         command = f'/unban {player_user}{reason1}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='pardon', description='Pardons the selected player. THIS IS DIFFERENT FROM /UNBAN!')
-    async def sub_command(self, ctx, player_user: str, reason: Optional[str]):
+    async def sub_command(self, interaction, player_user: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
         else:
             reason1 = f' {reason}'
         command = f'/pardon {player_user}{reason1}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='run', description='Runs any command you provide, given that it has correct syntax.')
-    async def sub_command(self, ctx, command: str):
-        mod_chat = ctx.guild.get_channel(vars.logChannel)
-        if ctx.channel == mod_chat:
-            await send_rcon(command, ctx, True)
+    async def sub_command(self, interaction, command: str):
+        mod_chat = interaction.guild.get_channel(vars.logChannel)
+        if interaction.channel == mod_chat:
+            await send_rcon(command, interaction, True)
         else:
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in {mod_chat.mention}.\n-# `Error Code 421`',
                                   title='RCON: <:resources:1278835693900136532>')
-            await ctx.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @cmd.command(name='clear', description='Clears the selected player\'s inventory.')
-    async def sub_command(self, ctx, player: str, item: Optional[str]):
+    async def sub_command(self, interaction, player: str, item: Optional[str]):
         if item is None:
             items = ''
         else:
             items = f' {item}'
         command = f'/clear {player}{items}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='list', description='Lists all the players online.')
-    async def sub_command(self, ctx):
+    async def sub_command(self, interaction):
         command = '/list'
-        await send_rcon(command, ctx, False)
+        await send_rcon(command, interaction, False)
 
     @cmd.command(name='restore', description='Restores the grave of a player\'s last death.')
-    async def sub_command(self, ctx, player: str):
+    async def sub_command(self, interaction, player: str):
         command = f'/yigd restore {player}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='view-balance', description='Allows you to see someone\'s Nm. Balance.')
-    async def sub_command(self, ctx, player: str):
+    async def sub_command(self, interaction, player: str):
         command = f'/nm view {player}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='tp-offline', description='Allows you to TP Someone who\'s offline.')
-    async def sub_command(self, ctx, player: str, pos: str):
+    async def sub_command(self, interaction, player: str, pos: str):
         command = f'/tp_offline {player} {pos}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='heal', description='Heals the selected player.')
-    async def sub_command(self, ctx, player: str):
+    async def sub_command(self, interaction, player: str):
         command = f'/heal {player}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='whitelist-toggle', description='Toggle the whitelist on or off.')
-    async def sub_command(self, ctx, enable: bool):
+    async def sub_command(self, interaction, enable: bool):
         if enable:
             command = f'/whitelist on'
         else:
             command = f'/whitelist off'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='whitelist-entry', description='Adds or removes a user to the whitelist.')
-    async def sub_command(self, ctx, player: str, can_enter: bool):
+    async def sub_command(self, interaction, player: str, can_enter: bool):
         if can_enter:
             command = f'/whitelist add {player}'
         else:
             command = f'/whitelist remove {player}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='whitelist', description='Lists the Whitelist')
-    async def sub_command(self, ctx):
+    async def sub_command(self, interaction):
         command = f'/whitelist list'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='damage', description='Damages the selected player.')
-    async def sub_command(self, ctx, player: str, amount: float):
+    async def sub_command(self, interaction, player: str, amount: float):
         command = f'/damage {player} {amount}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='ban-legacy', description='Uses Minecraft\'s ban system.')
-    async def sub_command(self, ctx, player: str, reason: Optional[str]):
+    async def sub_command(self, interaction, player: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
         else:
             reason1 = f' {reason}'
         command = f'/minecraft:ban {player}{reason1}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     @cmd.command(name='unban-legacy', description='Uses Minecraft\'s ban system.')
-    async def sub_command(self, ctx, player: str, reason: Optional[str]):
+    async def sub_command(self, interaction, player: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
         else:
             reason1 = f' {reason}'
         command = f'/minecraft:pardon {player}{reason1}'
-        await send_rcon(command, ctx, True)
+        await send_rcon(command, interaction, True)
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -1048,14 +1049,14 @@ class StatusCog(commands.Cog):
 
     @status.command(name='downtime', description='Pregen a Downtime Embed, should be used when the server is down.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
-    async def sub_command(self, ctx, title: str, summary: Optional[str], impact: Optional[str],
+    async def sub_command(self, interaction, title: str, summary: Optional[str], impact: Optional[str],
                           channel: Optional[discord.TextChannel], ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}; DOWN'
         await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                 status=discord.Status.online)
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         if summary is None:
             summary = 'No summary was provided.'
         if impact is None:
@@ -1075,22 +1076,22 @@ class StatusCog(commands.Cog):
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
         message = await channel.send(embed=embed, content=ping)
         view = views.DeleteEmbed(message=message)
-        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+        await interaction.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
-        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated the server as DOWNTIME: {title}.')
+        info(f'[{util.time()}] >STATUS> {interaction.user.name} stated the server as DOWNTIME: {title}.')
 
     @status.command(name='update',
                     description='Pregen a Downtime Update Embed, should be used when an update about a downtime can be given.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
-    async def sub_command(self, ctx, title: str, summary: Optional[str], channel: Optional[discord.TextChannel],
+    async def sub_command(self, interaction, title: str, summary: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}'
         await self.bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                 status=discord.Status.online)
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         if summary is None:
             summary = 'No summary was provided.'
         if ping is None:
@@ -1105,19 +1106,19 @@ class StatusCog(commands.Cog):
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
         message = await channel.send(embed=embed, content=ping)
         view = views.DeleteEmbed(message=message)
-        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+        await interaction.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
-        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated a status update: {title}.')
+        info(f'[{util.time()}] >STATUS> {interaction.user.name} stated a status update: {title}.')
 
     @status.command(name='uptime',
                     description='Pregen a Downtime Update Embed, that\'s specifically for the service being back up.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
-    async def sub_command(self, ctx, title: str, note: Optional[str], channel: Optional[discord.TextChannel],
+    async def sub_command(self, interaction, title: str, note: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'), status=discord.Status.online)
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         if note is None:
             note = 'No extra note was provided.'
         if ping is None:
@@ -1132,18 +1133,18 @@ class StatusCog(commands.Cog):
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
         message = await channel.send(embed=embed, content=ping)
         view = views.DeleteEmbed(message=message)
-        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+        await interaction.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
-        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated the server as UP: {title}.')
+        info(f'[{util.time()}] >STATUS> {interaction.user.name} stated the server as UP: {title}.')
 
     @status.command(name='notice',
                     description='Pregen a Notice Embed.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
-    async def sub_command(self, ctx, note: str, channel: Optional[discord.TextChannel],
+    async def sub_command(self, interaction, note: str, channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         if ping is None:
             ping = ' '
         else:
@@ -1155,27 +1156,27 @@ class StatusCog(commands.Cog):
                              icon_url='https://media.discordapp.net/attachments/1249069998148812930/1296890029368545332/GunjiCord.png?ex=6713ee76&is=67129cf6&hm=d7787038b655a669e758ccfda1258a217280ec6667b8a341f694134f024e94e9&=&format=webp&quality=lossless&width=384&height=384')
         message = await channel.send(embed=embed, content=ping)
         view = views.DeleteEmbed(message=message)
-        await ctx.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
+        await interaction.response.send_message(embed=embed, ephemeral=True, content='The following Embed was sent:',
                                             view=view)
-        info(f'[{util.time()}] >STATUS> {ctx.user.name} stated a NOTICE: {note}.')
+        info(f'[{util.time()}] >STATUS> {interaction.user.name} stated a NOTICE: {note}.')
 
     @status.command(name='status', description='Change the Bot\'s status to say Minecraft Server Stati.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
-    async def slash_command(self, ctx, status: str, reset: Optional[bool] = False, down: Optional[bool] = False):
+    async def slash_command(self, interaction, status: str, reset: Optional[bool] = False, down: Optional[bool] = False):
         if down:
             status = f'{status}; DOWN'
         if reset is False:
             await self.bot.change_presence(
                     activity=discord.Activity(type=discord.ActivityType.custom, state=status, name='CustomStatus'),
                     status=discord.Status.online)
-            await ctx.response.send_message('Attempted to change status.', ephemeral=True)
-            info(f'[{util.time()}] >STATUS> {ctx.user.name} changed bot status: {status}.')
+            await interaction.response.send_message('Attempted to change status.', ephemeral=True)
+            info(f'[{util.time()}] >STATUS> {interaction.user.name} changed bot status: {status}.')
         else:
             await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'),
                                                status=discord.Status.online)
-            await ctx.response.send_message('Attempted to reset status.', ephemeral=True)
-            info(f'[{util.time()}] >STATUS> {ctx.user.name} reset the bot status.')
+            await interaction.response.send_message('Attempted to reset status.', ephemeral=True)
+            info(f'[{util.time()}] >STATUS> {interaction.user.name} reset the bot status.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -1214,56 +1215,56 @@ class ThreadCog(commands.Cog):
     thread = app_commands.Group(name='thread', description='Commands for managing your thread.')
 
     @thread.command(name='pin', description='Pin or unpin a message in your thread, given you have permission.')
-    async def sub_command(self, ctx, message_id: str):
-        message = await ctx.channel.fetch_message(int(message_id))
-        channel = ctx.channel
-        perms = channel.permissions_for(ctx.user)
-        if channel.owner is not ctx.user and not perms.manage_messages:
-            await ctx.response.send_message(content='You do not have the permissions to send this command.',
+    async def sub_command(self, interaction, message_id: str):
+        message = await interaction.channel.fetch_message(int(message_id))
+        channel = interaction.channel
+        perms = channel.permissions_for(interaction.user)
+        if channel.owner is not interaction.user and not perms.manage_messages:
+            await interaction.response.send_message(content='You do not have the permissions to send this command.',
                                             ephemeral=True)
         else:
             if not message.pinned:
-                await message.pin(reason=f'{ctx.user.mention} pinned a message in their thread, {ctx.channel.mention}.')
-                info(f'[{util.time()}] >LOG> {ctx.user.name} pinned a message in their thread.')
+                await message.pin(reason=f'{interaction.user.mention} pinned a message in their thread, {interaction.channel.mention}.')
+                info(f'[{util.time()}] >LOG> {interaction.user.name} pinned a message in their thread.')
             else:
                 await message.unpin(
-                    reason=f'{ctx.user.mention} unpinned a message in their thread, {ctx.channel.mention}.')
-                info(f'[{util.time()}] >LOG> {ctx.user.name} unpinned a message in their thread.')
+                    reason=f'{interaction.user.mention} unpinned a message in their thread, {interaction.channel.mention}.')
+                info(f'[{util.time()}] >LOG> {interaction.user.name} unpinned a message in their thread.')
 
     @thread.command(name='lock', description='Lock or unlock your thread, given you have permission.')
-    async def sub_command(self, ctx, thread: Optional[discord.Thread]):
+    async def sub_command(self, interaction, thread: Optional[discord.Thread]):
         if thread is None:
-            thread = ctx.channel
-        perms = thread.permissions_for(ctx.user)
-        if thread.owner is not ctx.user and not perms.manage_threads:
-            await ctx.response.send_message(content='You do not have the permissions to send this command.',
+            thread = interaction.channel
+        perms = thread.permissions_for(interaction.user)
+        if thread.owner is not interaction.user and not perms.manage_threads:
+            await interaction.response.send_message(content='You do not have the permissions to send this command.',
                                             ephemeral=True)
         else:
             if not thread.locked:
-                await thread.edit(locked=True, reason=f'{ctx.user.mention} locked their thread, {thread.mention}.')
-                info(f'[{util.time()}] >LOG> {ctx.user.name} locked their thread.')
+                await thread.edit(locked=True, reason=f'{interaction.user.mention} locked their thread, {thread.mention}.')
+                info(f'[{util.time()}] >LOG> {interaction.user.name} locked their thread.')
             else:
-                await thread.edit(locked=True, reason=f'{ctx.user.mention} unlocked their thread, {thread.mention}.')
-                info(f'[{util.time()}] >LOG> {ctx.user.name} unlocked their thread.')
+                await thread.edit(locked=True, reason=f'{interaction.user.mention} unlocked their thread, {thread.mention}.')
+                info(f'[{util.time()}] >LOG> {interaction.user.name} unlocked their thread.')
 
     @thread.command(name='delete', description='Deletes your thread, given you have permission.')
-    async def sub_command(self, ctx, thread: Optional[discord.Thread]):
+    async def sub_command(self, interaction, thread: Optional[discord.Thread]):
         if thread is None:
-            thread = ctx.channel
-        perms = thread.permissions_for(ctx.user)
-        if thread.owner is not ctx.user and not perms.manage_threads:
-            await ctx.response.send_message(content='You do not have the permissions to send this command.',
+            thread = interaction.channel
+        perms = thread.permissions_for(interaction.user)
+        if thread.owner is not interaction.user and not perms.manage_threads:
+            await interaction.response.send_message(content='You do not have the permissions to send this command.',
                                             ephemeral=True)
         else:
             embed = discord.Embed(title='Warning:', colour=discord.Colour.brand_red(),
                                   description=f'You are about to fully delete {thread.mention}, are you sure?\nNote that this action is IRREVERSIBLE!')
             view = views.ConfirmDeleteThreadButton(thread=thread)
-            await ctx.response.send_message(embed=embed, view=view)
+            await interaction.response.send_message(embed=embed, view=view)
 
     @thread.command(name='info', description='Displays info about the Thread.')
-    async def sub_command(self, ctx, thread: Optional[discord.Thread]):
+    async def sub_command(self, interaction, thread: Optional[discord.Thread]):
         if thread is None:
-            thread = ctx.channel
+            thread = interaction.channel
 
         last_message = thread.last_message
         if last_message is None:
@@ -1283,8 +1284,8 @@ class ThreadCog(commands.Cog):
 <:arrow_under:1278834153655107646> Last Message: {last_message}{jump_to_top}
 '''
         embed = discord.Embed(title=f'Info about {thread.mention}', description=description)
-        await ctx.response.send_message(embed=embed, ephemeral=True)
-        info(f'[{util.time()}] >LOG> {ctx.user.name} viewed info about {thread.name}.')
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        info(f'[{util.time()}] >LOG> {interaction.user.name} viewed info about {thread.name}.')
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
@@ -1324,11 +1325,11 @@ class ModCog(commands.Cog):
 
     @moderation.command(name='ban', description='Bans a user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
-    async def sub_command(self, ctx, offender: discord.Member, reason: Optional[str] = 'No reason given',
+    async def sub_command(self, interaction, offender: discord.Member, reason: Optional[str] = 'No reason given',
                           time: Optional[str] = 'infinite', delete_messages: Optional[bool] = False,
                           silent: Optional[bool] = False):
         offender_dm = await offender.create_dm()
-        reason_for_audit = f'{ctx.user.mention}: {reason}.'
+        reason_for_audit = f'{interaction.user.mention}: {reason}.'
         if delete_messages:
             del_days = 7
         else:
@@ -1353,7 +1354,7 @@ class ModCog(commands.Cog):
             elif dur_str == 'M':
                 unban_time = unban_time + timedelta(days=dur_int * 30)  # Approximate month length
 
-            database.DatabaseManager().tempbans.add_temp_ban(offender.id, ctx.guild.id, unban_time.isoformat(), reason)
+            database.DatabaseManager().tempbans.add_temp_ban(offender.id, interaction.guild.id, unban_time.isoformat(), reason)
             time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M:%S')}"
         else:
             time_str = "indefinitely"
@@ -1361,7 +1362,7 @@ class ModCog(commands.Cog):
         await offender_dm.send(content=f'''Hi. Unfortunately I am here to inform you that you have been banned from GunjiCordia.
 The reason for your ban was: **{reason}**.
 You are banned **{time_str}**.
-The moderator responsible for your ban was {ctx.user.mention}.
+The moderator responsible for your ban was {interaction.user.mention}.
 
 If you think this ban was not rightful, or an actual accident feel free to contact said, or a different moderator.
 I wish you a great day further!''')
@@ -1370,15 +1371,15 @@ I wish you a great day further!''')
         embed = discord.Embed(
             description=f'{offender.mention} was banned from the server {time_str}. <:red:1301608135370473532>',
             colour=discord.Colour.red())
-        await ctx.response.send_message(embed=embed, ephemeral=silent)
+        await interaction.response.send_message(embed=embed, ephemeral=silent)
         info(
-            f'{util.time()} >LOG> {ctx.user.name} Banned {offender.name} from {ctx.guild.name} for {reason} {time_str}.')
+            f'{util.time()} >LOG> {interaction.user.name} Banned {offender.name} from {interaction.guild.name} for {reason} {time_str}.')
 
     @moderation.command(name='unban', description='Unbans the user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
-    async def unban(self, ctx, offender: discord.User, reason: Optional[str] = 'No reason given',
+    async def unban(self, interaction, offender: discord.User, reason: Optional[str] = 'No reason given',
                     silent: Optional[bool] = False):
-        reason_for_audit = f'{ctx.user.mention}: {reason}.'
+        reason_for_audit = f'{interaction.user.mention}: {reason}.'
         active_bans = database.DatabaseManager().tempbans.get_active_bans()
 
         for ban in active_bans:
@@ -1391,40 +1392,40 @@ I wish you a great day further!''')
                 except discord.HTTPException:
                     info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
                     continue
-        ctx.guild.unban(user=offender, reason=reason_for_audit)
+        interaction.guild.unban(user=offender, reason=reason_for_audit)
         embed = discord.Embed(
             description=f'{offender.mention} was unbanned from the server. <:green:1301608134011256852>',
             colour=discord.Colour.green())
-        await ctx.response.send_message(embed=embed, ephemeral=silent)
-        info(f'{util.time()} >LOG> {ctx.user.name} Unbanned {offender.name} from {ctx.guild.name} for {reason}.')
+        await interaction.response.send_message(embed=embed, ephemeral=silent)
+        info(f'{util.time()} >LOG> {interaction.user.name} Unbanned {offender.name} from {interaction.guild.name} for {reason}.')
 
     @moderation.command(name='kick', description='Kicks a user.')
     @discord.app_commands.checks.has_permissions(kick_members=True)
-    async def sub_command(self, ctx, offender: discord.Member, reason: Optional[str] = 'No reason given',
+    async def sub_command(self, interaction, offender: discord.Member, reason: Optional[str] = 'No reason given',
                           silent: Optional[bool] = False):
         offender_dm = await offender.create_dm()
-        reason_for_audit = f'{ctx.user.mention}: {reason}.'
+        reason_for_audit = f'{interaction.user.mention}: {reason}.'
         await offender_dm.send(f'''Hi. I am here to inform you that you have been kicked from GunjiCordia.
 The reason for your kick was: `{reason}`.
-The moderator responsible for your kick was {ctx.user.mention}.
+The moderator responsible for your kick was {interaction.user.mention}.
 
 If you wish to join back, here is the Discord Invite Link: {vars.guildInviteLink}
 I wish you a great day further!''')
         await offender.kick(reason=reason_for_audit)
         embed = discord.Embed(description=f'{offender.mention} was kicked from the server. <:red:1301608135370473532>',
                               colour=discord.Colour.red())
-        await ctx.response.send_message(embed=embed, ephemeral=silent)
-        info(f'{util.time()} >LOG> {ctx.user.name} Kicked {offender.name} from {ctx.guild.name} for {reason}.')
+        await interaction.response.send_message(embed=embed, ephemeral=silent)
+        info(f'{util.time()} >LOG> {interaction.user.name} Kicked {offender.name} from {interaction.guild.name} for {reason}.')
 
     @moderation.command(name='timeout', description='Times out a user.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
-    async def sub_command(self, ctx, offender: discord.Member, duration: str,
+    async def sub_command(self, interaction, offender: discord.Member, duration: str,
                           reason: Optional[str] = 'No reason given', silent: Optional[bool] = False):
         dur = util.format_duration(duration)
         dur_int = util.from_formatted_get_int(dur)
         dur_str = util.from_formatted_get_str(dur)
         dur_days = util.get_duration_in_days(dur_str, dur_int)
-        reason = f'{ctx.user.mention}: {reason}.'
+        reason = f'{interaction.user.mention}: {reason}.'
         invalid = False
         handled = False
 
@@ -1432,14 +1433,14 @@ I wish you a great day further!''')
             embed = discord.Embed(
                 description=f'<:warn:1249069667159638206> `{duration}`, even when automatically corrected to `{dur}` by our system, is an invalid duration length!\n\n> <:info:1278823933717512232> Note: The technical limit is 28 days.\n> If you think it should actually be correct, please report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and show this Embed.\n-# {vars.botVersion} | {dur}:{dur_int}:{dur_str}:{dur_days}',
                 colour=discord.Colour.red())
-            await ctx.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             invalid = True
             handled = True
         if dur_str != 's' and dur_str != 'm' and dur_str != 'h' and dur_str != 'd' and dur_str != 'w' and not invalid:
             embed = discord.Embed(
                 description=f'<:warn:1249069667159638206> `{duration}` does not seem like a valid duration even when automatically corrected to `{dur}` by our system!\n\n> <:info:1278823933717512232> A correct format would be: e.g. 1w, 1 week, 6 days, 2h.\n> If you think it should actually be correct, please report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and show this Embed.\n-# {vars.botVersion} | {dur}:{dur_int}:{dur_str}:{dur_days}',
                 colour=discord.Colour.red())
-            await ctx.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             invalid = True
             handled = True
 
@@ -1448,7 +1449,7 @@ I wish you a great day further!''')
                 description=f'{offender.mention} was timed out for {dur_int} second(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(seconds=dur_int), reason=reason)
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
             invalid = False
             handled = True
         if 'm' == dur_str and not invalid and not handled:
@@ -1456,7 +1457,7 @@ I wish you a great day further!''')
                 description=f'{offender.mention} was timed out for {dur_int} minutes(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(minutes=dur_int), reason=reason)
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
             invalid = False
             handled = True
         if 'h' == dur_str and not invalid and not handled:
@@ -1464,7 +1465,7 @@ I wish you a great day further!''')
                 description=f'{offender.mention} was timed out for {dur_int} hours(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(hours=dur_int), reason=reason)
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
             invalid = False
             handled = True
         if 'd' == dur_str and not invalid and not handled:
@@ -1472,7 +1473,7 @@ I wish you a great day further!''')
                 description=f'{offender.mention} was timed out for {dur_int} days(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(days=dur_int), reason=reason)
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
             invalid = False
             handled = True
         if 'w' == dur_str and not invalid and not handled:
@@ -1480,60 +1481,60 @@ I wish you a great day further!''')
                 description=f'{offender.mention} was timed out for {dur_int} week(s). <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await offender.timeout(timedelta(weeks=dur_int), reason=reason)
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
 
     @moderation.command(name='lock', description='Lock or unlock the channel.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
-    async def sub_command(self, ctx, silent: Optional[bool] = False):
-        channel = ctx.channel
+    async def sub_command(self, interaction, silent: Optional[bool] = False):
+        channel = interaction.channel
         if channel.type != discord.ChannelType.text:
             embed = discord.Embed(
                 description=f'<:warn:1249069667159638206> {channel.mention} is not a valid text channel!',
                 colour=discord.Colour.red())
-            await ctx.response.send_message(embed=embed, ephemeral=True)
-        elif channel.overwrites_for(ctx.guild.default_role).send_messages is False:
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        elif channel.overwrites_for(interaction.guild.default_role).send_messages is False:
             embed = discord.Embed(
-                description=f'{channel.mention} was unlocked by {ctx.user.mention}. <:blue:1301608132195258368>',
+                description=f'{channel.mention} was unlocked by {interaction.user.mention}. <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
-            await channel.set_permissions(ctx.guild.default_role,
+            await channel.set_permissions(interaction.guild.default_role,
                                           overwrite=discord.PermissionOverwrite(send_messages=True))
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
         else:
             embed = discord.Embed(
-                description=f'{channel.mention} was locked by {ctx.user.mention}. <:blue:1301608132195258368>',
+                description=f'{channel.mention} was locked by {interaction.user.mention}. <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
-            await channel.set_permissions(ctx.guild.default_role,
+            await channel.set_permissions(interaction.guild.default_role,
                                           overwrite=discord.PermissionOverwrite(send_messages=False))
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
 
     @moderation.command(name='slowmode', description='Set a slowmode for the channel.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
-    async def sub_command(self, ctx, channel: Optional[discord.TextChannel], duration: int,
+    async def sub_command(self, interaction, channel: Optional[discord.TextChannel], duration: int,
                           silent: Optional[bool] = False):
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         if channel.type != discord.ChannelType.text:
             embed = discord.Embed(
                 description=f'<:warn:1249069667159638206> {channel.mention} is not a valid text channel!',
                 colour=discord.Colour.red())
-            await ctx.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         elif duration > 21600:
             embed = discord.Embed(
                 description=f'<:warn:1249069667159638206> {duration} is too long of a duration!\nThe maximum is 21600.',
                 colour=discord.Colour.red())
-            await ctx.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         elif duration != 0:
             await channel.edit(slowmode_delay=duration)
             embed = discord.Embed(
-                description=f'{channel.mention} was set on a slowmode of {duration} seconds by {ctx.user.mention}. <:blue:1301608132195258368>',
+                description=f'{channel.mention} was set on a slowmode of {duration} seconds by {interaction.user.mention}. <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
         else:
             await channel.edit(slowmode_delay=duration)
             embed = discord.Embed(
-                description=f'{channel.mention}\'s slowmode was disabled by {ctx.user.mention}. <:blue:1301608132195258368>',
+                description=f'{channel.mention}\'s slowmode was disabled by {interaction.user.mention}. <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
-            await ctx.response.send_message(embed=embed, ephemeral=silent)
+            await interaction.response.send_message(embed=embed, ephemeral=silent)
 
     async def cog_app_command_error(self, interaction, error):
         if isinstance(error, discord.app_commands.errors.CommandOnCooldown):
