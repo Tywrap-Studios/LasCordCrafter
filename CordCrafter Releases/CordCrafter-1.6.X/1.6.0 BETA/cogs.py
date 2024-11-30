@@ -40,7 +40,7 @@ class StandaloneCog(commands.Cog):
         self.start_time = start_time
 
     @commands.command(name='debug-sync')
-    async def sync(self, ctx):
+    async def sync(self, ctx: discord.ext.commands.Context):
         tywrap = ctx.guild.get_member(1041430503389155492)
         if ctx.author == tywrap:
             info(f'[{util.time()}] >LOG> Bot Tree Sync Started by {ctx.author.name}.')
@@ -50,7 +50,7 @@ class StandaloneCog(commands.Cog):
             info(f'[{util.time()}] >LOG> Bot Tree Sync Failed: no permission.')
 
     @commands.command(name='debug-stop')
-    async def exit(self, ctx):
+    async def exit(self, ctx: discord.ext.commands.Context):
         tywrap = ctx.guild.get_member(1041430503389155492)
         if ctx.author == tywrap:
             info(f'[{util.time()}] >LOG> Bot Stopped by {ctx.author.name}.')
@@ -59,14 +59,14 @@ class StandaloneCog(commands.Cog):
             info(f'[{util.time()}] >LOG> Failed to stop bot.')
 
     @commands.command(name='debug-flush_database')
-    async def flush_database(self, ctx):
-        active_bans = database.DatabaseManager().tempbans.get_active_bans()
+    async def flush_database(self, ctx: discord.ext.commands.Context):
+        active_bans = await database.get_active_bans()
         tywrap = ctx.guild.get_member(1041430503389155492)
         if ctx.author == tywrap:
             for ban in active_bans:
                 user_id, guild_id, unban_time, reason = ban
                 try:
-                    database.DatabaseManager().tempbans.remove_temp_ban(user_id)
+                    await database.remove_temp_ban(user_id)
                 except:
                     info(f'[{util.time()}] >LOG> Something went wrong while Flushing a database entry.')
                     continue
@@ -74,20 +74,20 @@ class StandaloneCog(commands.Cog):
 
     @discord.app_commands.command(name='ip-joining', description='Tells the person you specify how to join the server.')
     async def ip_joining(self, interaction, member: discord.Member) -> None:
-        illiterate = database.DatabaseManager().illiterate
         await interaction.response.send_message(f'''Hey, <@{member.id}>!
 Are you wondering how to join? The server IP alongside the Modpack Link and the Rules are all located in
 - {vars.ipChannel}.
 And hey, if you're there already, why not read the rules?
 
 > ## For the future: Please use your eyes, not your mouth.
-> ~ Sincerely, the entire admin team cuz this question was asked by {len(illiterate.get_amount())} people already. /hj''')
-        illiterate.add_person(member.id)
+> ~ Sincerely, the entire admin team cuz this question was asked by too many people already. /hj''')
         info(f'[{util.time()}] >LOG> {interaction.user.name} ran /ip-joining for {member.name}.')
 
     @discord.app_commands.command(name='ping', description='See how slow/fast the Bot\'s reaction time (ping) is.')
     async def ping(self, interaction) -> None:
+        info(f'[{util.time()}] >LOG> Defer BEFORE')
         await interaction.response.defer()
+        info(f'[{util.time()}] >LOG> Defer AFTER')
         latency = round(self.bot.latency * 1000)
         latency_str = f'`{latency}ms`'
         if latency > 200 or latency == 200:
@@ -100,8 +100,10 @@ And hey, if you're there already, why not read the rules?
                     latency_str = f'`{latency}ms` <:con_excellent:1278830872929501286>'
         embed = discord.Embed(description=f'## Pong! {latency_str}', colour=discord.Colour.from_rgb(70, 230, 210))
         embed.set_footer(text='Want to see more? Use /stats!', )
+        info(f'[{util.time()}] >LOG> Followup BEFORE')
         await interaction.followup.send(embed=embed)
-        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /ping -> {latency_str}.')
+        info(f'[{util.time()}] >LOG> Followup AFTER')
+        info(f'[{util.time()}] >LOG> {interaction.user.name} ran /ping -> {latency}.')
 
     @discord.app_commands.command(name="bean", description="Beans the member. Yep. That's all it does.")
     async def bean(self, interaction, member: discord.Member):
@@ -1354,7 +1356,7 @@ class ModCog(commands.Cog):
             elif dur_str == 'M':
                 unban_time = unban_time + timedelta(days=dur_int * 30)  # Approximate month length
 
-            database.DatabaseManager().tempbans.add_temp_ban(offender.id, interaction.guild.id, unban_time.isoformat(), reason)
+            await database.add_temp_ban(offender.id, interaction.guild.id, unban_time.isoformat(), reason)
             time_str = f"until {unban_time.strftime('%Y-%m-%d %H:%M:%S')}"
         else:
             time_str = "indefinitely"
@@ -1372,22 +1374,21 @@ I wish you a great day further!''')
             description=f'{offender.mention} was banned from the server {time_str}. <:red:1301608135370473532>',
             colour=discord.Colour.red())
         await interaction.response.send_message(embed=embed, ephemeral=silent)
-        info(
-            f'{util.time()} >LOG> {interaction.user.name} Banned {offender.name} from {interaction.guild.name} for {reason} {time_str}.')
+        info(f'{util.time()} >LOG> {interaction.user.name} Banned {offender.name} from {interaction.guild.name} for {reason} {time_str}.')
 
     @moderation.command(name='unban', description='Unbans the user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
     async def unban(self, interaction, offender: discord.User, reason: Optional[str] = 'No reason given',
                     silent: Optional[bool] = False):
         reason_for_audit = f'{interaction.user.mention}: {reason}.'
-        active_bans = database.DatabaseManager().tempbans.get_active_bans()
+        active_bans = await database.get_active_bans()
 
         for ban in active_bans:
             user_id, guild_id, unban_time, reason = ban
 
             if offender.id == user_id:
                 try:
-                    database.DatabaseManager().tempbans.remove_temp_ban(user_id)
+                    await database.remove_temp_ban(user_id)
                     info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
                 except discord.HTTPException:
                     info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
@@ -1509,8 +1510,13 @@ I wish you a great day further!''')
 
     @moderation.command(name='slowmode', description='Set a slowmode for the channel.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
-    async def sub_command(self, interaction, channel: Optional[discord.TextChannel], duration: int,
+    async def sub_command(self, interaction, channel: Optional[discord.TextChannel], duration: str,
                           silent: Optional[bool] = False):
+        dur = util.format_duration(duration)
+        dur_int = util.from_formatted_get_int(dur)
+        dur_str = util.from_formatted_get_str(dur)
+        dur_seconds = round(util.get_duration_in_days(dur_str, dur_int) * 86400)
+
         if channel is None:
             channel = interaction.channel
         if channel.type != discord.ChannelType.text:
@@ -1518,19 +1524,19 @@ I wish you a great day further!''')
                 description=f'<:warn:1249069667159638206> {channel.mention} is not a valid text channel!',
                 colour=discord.Colour.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
-        elif duration > 21600:
+        elif dur_seconds > 21600:
             embed = discord.Embed(
-                description=f'<:warn:1249069667159638206> {duration} is too long of a duration!\nThe maximum is 21600.',
+                description=f'<:warn:1249069667159638206> {dur} is too long of a duration!\nThe maximum is 6 hours.',
                 colour=discord.Colour.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
-        elif duration != 0:
-            await channel.edit(slowmode_delay=duration)
+        elif dur_seconds != 0:
+            await channel.edit(slowmode_delay=dur_seconds)
             embed = discord.Embed(
-                description=f'{channel.mention} was set on a slowmode of {duration} seconds by {interaction.user.mention}. <:blue:1301608132195258368>',
+                description=f'{channel.mention} was set on a slowmode of {dur} seconds by {interaction.user.mention}. <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())
             await interaction.response.send_message(embed=embed, ephemeral=silent)
         else:
-            await channel.edit(slowmode_delay=duration)
+            await channel.edit(slowmode_delay=dur_seconds)
             embed = discord.Embed(
                 description=f'{channel.mention}\'s slowmode was disabled by {interaction.user.mention}. <:blue:1301608132195258368>',
                 colour=discord.Colour.blue())

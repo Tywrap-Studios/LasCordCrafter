@@ -80,7 +80,7 @@ class CordBot(commands.Bot):
         os.makedirs('databases', exist_ok=True)
         info('Directory Initialized.')
         info('Initializing Database(s). . .')
-        database.DatabaseManager.init_all(database.DatabaseManager())
+        await database.init_db()
         info('Database(s) Initialized.')
         info('-----------------------------------------Intents------------------------------------------')
         info('''Intents set:
@@ -128,7 +128,7 @@ class CordBot(commands.Bot):
 
     @tasks.loop(minutes=1)
     async def check_temp_bans(self):
-        active_bans = database.DatabaseManager().tempbans.get_active_bans()
+        active_bans = await database.get_active_bans()
         current_time = datetime.now()
 
         for ban in active_bans:
@@ -138,8 +138,8 @@ class CordBot(commands.Bot):
             if current_time >= unban_datetime:
                 guild = self.get_guild(guild_id)
                 try:
-                    await guild.unban(discord.Object(id=user_id), reason="Temporary ban expired")
-                    database.DatabaseManager().tempbans.remove_temp_ban(user_id)
+                    await guild.unban(discord.Object(id=user_id), reason="A temporary ban expired")
+                    await database.remove_temp_ban(user_id)
                     info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
                 except discord.HTTPException:
                     info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
