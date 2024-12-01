@@ -9,12 +9,12 @@ rcon_host_env = os.getenv('RCON_HOST')
 rcon_port_env = os.getenv('RCON_PORT')
 rcon_logger_webhook_url_env = os.getenv('RCON_LOGGER_WEBHOOK')
 sanitization_webhook_url_env = os.getenv('SAN_LOGGER_WEBHOOK')
-botToken_env = os.getenv("TEST_TOKEN")  # Interchangeable, please change for final release. For other devs: Use your own token.
+botToken_env = os.getenv("CORD_TOKEN")  # Interchangeable, please change for final release. For other devs: Use your own token.
 log_filepath_w_env = os.getenv('WINDOWS_LOG_FILE_PATH')
 log_filepath_l_env = os.getenv('LINUX_LOG_FILE_PATH')
 
 # Files Related
-log_dir_path = log_filepath_w_env  # Interchangeable
+log_dir_path = log_filepath_l_env  # Interchangeable
 max_log_files = 10  # Set as you wish
 
 # Webhooks
@@ -22,12 +22,12 @@ sanitization_webhook_url = sanitization_webhook_url_env
 
 # Bot Stuff
 botToken = botToken_env
-botId = '1213859965836595260'  # Interchangeable, please change for final release.
+botId = '1248280095013998633'  # Interchangeable, please change for final release.
 botPing = f'<@{botId}>'
 botVersion = 'CordCrafter 1.6.0 [RELEASE]'  # Interchangeable, please change for final release.
-botName = 'CordToaster'  # Interchangeable, please change for final release.
+botName = 'CordCrafter'  # Interchangeable, please change for final release.
 botDescription = '''This is a Bot made by Tywrap Studios for the GunjiCordia Discord server to help people and others in the wonderful server that is Gunji's that he crafted back in july of 2023'''
-botCommandPrefix = '>>-'
+botCommandPrefix = '>>'
 
 # Links
 guildInviteLink = 'https://discord.gg/gunjicordia-1133093958889787475'
@@ -46,24 +46,24 @@ duregex = '^\d+\w*[smdw]$'
 # THE CURRENT VALUES ARE MERELY TEST VALUES!
 
 # Tags
-trusted_team_tag_id = 1287526517248622592  # 1287179981843206144
+trusted_team_tag_id = 1287179981843206144
 
 # Channels
 ipChannel = '<#1238669922641510502>'
 techSupportChannel = '<#1188157890117242952>'
-logChannel = 1248374509778632744  # 1191085319102140528
-ticketCategory = 1256762776035000401  # 1165265825196945449
-ticketLog = 1248374509778632744  # 1164581289022722148
-spam = 1273087934198976592  # 1139925935093727292
-team_forum = 1287526462215426170  # 1287178984530120715
-ctd_channel = 1273087934198976592  # 1219383524289941505
+logChannel = 1191085319102140528
+ticketCategory = 1165265825196945449
+ticketLog = 1164581289022722148
+spam = 1139925935093727292
+team_forum = 1287178984530120715
+ctd_channel = 1219383524289941505
 
 # Roles
-resigned = 1268338910300475393  # 1265790384336801964
-discordAdmin = 1248639531318513835  # 1160004558609731644
-minecraftAdmin = 1248646236475625535  # 1191088046695792720
-centralHosting = 1300072430341197955  # 1272562661451632702
-gunjiCord = 1300072489489268747  # 1139926170905886853
+resigned = 1265790384336801964
+discordAdmin = 1160004558609731644
+minecraftAdmin = 1191088046695792720
+centralHosting = 1272562661451632702
+gunjiCord = 1139926170905886853
 
 # Image Links
 red_badge_image = 'https://cdn.discordapp.com/attachments/1249069998148812930/1249078349477838899/red_mod_badge.png?ex=6665fe5d&is=6664acdd&hm=832fb33a6ed5fe76ecc7539e56842a526cf3309fc189e59e73b6bb78400eb441&'
