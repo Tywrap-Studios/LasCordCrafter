@@ -113,9 +113,9 @@ And hey, if you're there already, why not read the rules?
         await interaction.response.send_message(embed=embed)
         info(f'[{util.time()}] >LOG> {interaction.user.name} ran /bean for {member.name}.')
 
-    # noinspection SpellCheckingInspection
     @discord.app_commands.command(name='stats', description='Displays the Bot\'s statistics.')
     async def stats(self, interaction) -> None:
+        await interaction.response.defer()
         # Stats
         cpu_stat = psutil.cpu_percent(5)
         actual_ram = psutil.virtual_memory()[3] / 1000000
@@ -166,7 +166,7 @@ And hey, if you're there already, why not read the rules?
 ----------------------------
 **<:minecraft_logo:1278852452396826634> MC-Server Status:**
 <:arrow_under:1278834153655107646>{bot_status}''')
-        await interaction.response.send_message(embed=status_embed)
+        await interaction.followup.send(embed=status_embed)
         info(f'[{util.time()}] >LOG> {interaction.user.name} ran /stats -> {latency_str}.')
 
     @discord.app_commands.command(name='resign', description='Resigns the Minecraft admin you chose.')
@@ -280,6 +280,7 @@ class AppealServiceCog(commands.Cog):
 
     @discord.app_commands.command(name='setup', description='Sets up the Bot\'s Ban Appeal Function.')
     @discord.app_commands.checks.has_permissions(administrator=True)
+    @discord.app_commands.describe(channel='The channel to set the appeal service up in.')
     async def setup(self, interaction, channel: discord.TextChannel):
         embed = discord.Embed(colour=discord.Colour.from_rgb(230, 230, 60), title='**Appeal a Minecraft Unban.**',
                               description='By using the command **/appeal**, a Private Channel can be made for your Appeal.')
@@ -298,6 +299,7 @@ class AppealServiceCog(commands.Cog):
         info(f'[{util.time()}] >LOG> {interaction.user.name} ran /appeal.')
 
     @discord.app_commands.command(name='add', description='Adds a user to the current ticket.')
+    @discord.app_commands.describe(member='The member to add to the ticket.')
     async def add(self, interaction, member: discord.Member):
         if "ban-appeal-" in interaction.channel.name and member != interaction.user:
             await interaction.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True,
@@ -318,6 +320,7 @@ class AppealServiceCog(commands.Cog):
                     await interaction.response.send_message("You can't add or remove yourself!", ephemeral=True)
 
     @discord.app_commands.command(name='remove', description='Removes a user from the current ticket.')
+    @discord.app_commands.describe(member='The member to remove from the ticket.')
     async def remove(self, interaction, member: discord.Member):
         if "ban-appeal-" in interaction.channel.name and member != interaction.user:
             await interaction.channel.set_permissions(member, overwrite=None)
@@ -343,6 +346,7 @@ class AppealServiceCog(commands.Cog):
         info(f'[{util.time()}] >LOG> {interaction.user.name} closed {interaction.channel.name}.')
 
     @discord.app_commands.command(name='forceclose', description='Forcefully closes the selected ticket.')
+    @discord.app_commands.describe(ticket='The ticket channel to close.')
     async def forceclose(self, interaction, ticket: discord.TextChannel):
         allowedrole1 = interaction.guild.get_role(vars.discordAdmin)
         allowedrole2 = interaction.guild.get_role(vars.minecraftAdmin)
@@ -838,16 +842,19 @@ class CmdCog(commands.Cog):
     cmd = app_commands.Group(name='cmd', description='Send commands to the Minecraft server.')
 
     @cmd.command(name='tellraw', description='Says something in the MC Server.')
+    @discord.app_commands.describe(content='The String to send.')
     async def sub_command(self, interaction, content: str) -> None:
         command = f'/tellraw @a "{content}"'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='log', description='Logs your phrase to the Console.')
+    @discord.app_commands.describe(info='The String to send.')
     async def sub_command(self, interaction, info: str):
         command = f'/logtellraw targetless "{info}"'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='mclogs', description='Sends a request to mclo.gs for the latest.log, or a log you specify.')
+    @discord.app_commands.describe(log='The specific log to send. File name.')
     async def sub_command(self, interaction, log: Optional[str]):
         if log is None:
             file = ''
@@ -857,6 +864,7 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='maintenance', description='Allows you to Toggle Maintenance.')
+    @discord.app_commands.describe(enabled='Whether to enable or disable maintenance.')
     async def sub_command(self, interaction, enabled: bool):
         if enabled is True:
             arg = ' on'
@@ -866,6 +874,8 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='ban', description='Bans the selected player from the server.')
+    @discord.app_commands.describe(player_user='The player to ban.',
+                                   reason='The reason for the ban.')
     async def sub_command(self, interaction, player_user: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
@@ -875,6 +885,9 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='tempban', description='Temporarily Bans the selected player from the server.')
+    @discord.app_commands.describe(player_user='The player to ban.',
+                                   duration='The duration of the ban.',
+                                   reason='The reason for the ban.')
     async def sub_command(self, interaction, player_user: str, duration: str, reason: Optional[str]):
         duration_v2 = util.format_duration(duration)
         if reason is None:
@@ -893,7 +906,7 @@ class CmdCog(commands.Cog):
     @cmd.command(name='ban-ip', description='IP Bans the selected player from the server.')
     async def sub_command(self, interaction):
         embed = discord.Embed(colour=discord.Colour.red(),
-                              description='<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in game.\n-# `Error Code 423`',
+                              description='<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in game.',
                               title='RCON: <:resources:1278835693900136532>')
         await interaction.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {interaction.user.name} sent /ban-ip.')
@@ -901,12 +914,14 @@ class CmdCog(commands.Cog):
     @cmd.command(name='tempban-ip', description='IP Bans the selected player from the server.')
     async def sub_command(self, interaction):
         embed = discord.Embed(colour=discord.Colour.red(),
-                              description='<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in game.\n-# `Error Code 423`',
+                              description='<:against_rules:1279142167729668096> Due to security concerns and issues, please run this command in game.',
                               title='RCON: <:resources:1278835693900136532>')
         await interaction.response.send_message(embed=embed, ephemeral=True)
         info(f'[{util.time()}] >LOG> {interaction.user.name} sent /tempban-ip.')
 
     @cmd.command(name='unban', description='Unbans the selected player from the server.')
+    @discord.app_commands.describe(player_user='The player to unban.',
+                                   reason='The reason for the unban.')
     async def sub_command(self, interaction, player_user: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
@@ -916,6 +931,8 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='pardon', description='Pardons the selected player. THIS IS DIFFERENT FROM /UNBAN!')
+    @discord.app_commands.describe(player_user='The player to pardon.',
+                                   reason='The reason for the pardon.')
     async def sub_command(self, interaction, player_user: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
@@ -925,6 +942,7 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='run', description='Runs any command you provide, given that it has correct syntax.')
+    @discord.app_commands.describe(command='The command to run.')
     async def sub_command(self, interaction, command: str):
         mod_chat = interaction.guild.get_channel(vars.logChannel)
         if interaction.channel == mod_chat:
@@ -936,6 +954,8 @@ class CmdCog(commands.Cog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @cmd.command(name='clear', description='Clears the selected player\'s inventory.')
+    @discord.app_commands.describe(player='The player to clear.',
+                                   item='The specific item to clear. This needs a namespace if it isn\'t vanilla.')
     async def sub_command(self, interaction, player: str, item: Optional[str]):
         if item is None:
             items = ''
@@ -950,26 +970,32 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, False)
 
     @cmd.command(name='restore', description='Restores the grave of a player\'s last death.')
+    @discord.app_commands.describe(player='The player to restore for.')
     async def sub_command(self, interaction, player: str):
         command = f'/yigd restore {player}'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='view-balance', description='Allows you to see someone\'s Nm. Balance.')
+    @discord.app_commands.describe(player='The player to view the balance from.')
     async def sub_command(self, interaction, player: str):
         command = f'/nm view {player}'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='tp-offline', description='Allows you to TP Someone who\'s offline.')
+    @discord.app_commands.describe(player='The player to teleport.',
+                                   pos='The position to teleport to.')
     async def sub_command(self, interaction, player: str, pos: str):
         command = f'/tp_offline {player} {pos}'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='heal', description='Heals the selected player.')
+    @discord.app_commands.describe(player='The player to heal.')
     async def sub_command(self, interaction, player: str):
         command = f'/heal {player}'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='whitelist-toggle', description='Toggle the whitelist on or off.')
+    @discord.app_commands.describe(enable='Whether to enable or disable the whitelist.')
     async def sub_command(self, interaction, enable: bool):
         if enable:
             command = f'/whitelist on'
@@ -978,6 +1004,8 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='whitelist-entry', description='Adds or removes a user to the whitelist.')
+    @discord.app_commands.describe(player='The player to add or remove.',
+                                   can_enter='Whether to allow the player to enter the server.')
     async def sub_command(self, interaction, player: str, can_enter: bool):
         if can_enter:
             command = f'/whitelist add {player}'
@@ -991,11 +1019,15 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='damage', description='Damages the selected player.')
+    @discord.app_commands.describe(player='The player to damage.',
+                                   amount='The amount of damage to apply. Remember that 1 damage is 0.5 hearts.')
     async def sub_command(self, interaction, player: str, amount: float):
         command = f'/damage {player} {amount}'
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='ban-legacy', description='Uses Minecraft\'s ban system.')
+    @discord.app_commands.describe(player='The player to ban.',
+                                   reason='The reason for the ban.')
     async def sub_command(self, interaction, player: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
@@ -1005,6 +1037,8 @@ class CmdCog(commands.Cog):
         await send_rcon(command, interaction, True)
 
     @cmd.command(name='unban-legacy', description='Uses Minecraft\'s ban system.')
+    @discord.app_commands.describe(player='The player to unban.',
+                                   reason='The reason for the unban.')
     async def sub_command(self, interaction, player: str, reason: Optional[str]):
         if reason is None:
             reason1 = ''
@@ -1051,6 +1085,11 @@ class StatusCog(commands.Cog):
 
     @status.command(name='downtime', description='Pregen a Downtime Embed, should be used when the server is down.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
+    @discord.app_commands.describe(title='The title of the downtime.',
+                                   summary='A summary of this downtime.',
+                                   impact='The impact of this downtime.',
+                                   channel='The channel the notice will be sent to.',
+                                   ping='The user or role to ping.')
     async def sub_command(self, interaction, title: str, summary: Optional[str], impact: Optional[str],
                           channel: Optional[discord.TextChannel], ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}; DOWN'
@@ -1086,6 +1125,10 @@ class StatusCog(commands.Cog):
                     description='Pregen a Downtime Update Embed, should be used when an update about a downtime can be given.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
+    @discord.app_commands.describe(title='The title of the downtime.',
+                                   summary='A summary of this update.',
+                                   channel='The channel the notice will be sent to.',
+                                   ping='The user or role to ping.')
     async def sub_command(self, interaction, title: str, summary: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         status = f'{title}'
@@ -1116,6 +1159,10 @@ class StatusCog(commands.Cog):
                     description='Pregen a Downtime Update Embed, that\'s specifically for the service being back up.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
+    @discord.app_commands.describe(title='The title of the downtime.',
+                                   note='An extra note to give to the downtime.',
+                                   channel='The channel the notice will be sent to.',
+                                   ping='The user or role to ping.')
     async def sub_command(self, interaction, title: str, note: Optional[str], channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         await self.bot.change_presence(activity=discord.Game('on CordCraft Season 2'), status=discord.Status.online)
@@ -1143,6 +1190,9 @@ class StatusCog(commands.Cog):
                     description='Pregen a Notice Embed.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
+    @discord.app_commands.describe(note='The note to be sent.',
+                                   channel='The channel the notice will be sent to.',
+                                   ping='The user or role to ping.')
     async def sub_command(self, interaction, note: str, channel: Optional[discord.TextChannel],
                           ping: Optional[Union[discord.Member, discord.Role]]):
         if channel is None:
@@ -1165,6 +1215,9 @@ class StatusCog(commands.Cog):
     @status.command(name='status', description='Change the Bot\'s status to say Minecraft Server Stati.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting,
                                               vars.gunjiCord)
+    @discord.app_commands.describe(status='The status to change to.',
+                                   reset='Whether to reset the status to the default.',
+                                   down='Whether the server is down.')
     async def slash_command(self, interaction, status: str, reset: Optional[bool] = False, down: Optional[bool] = False):
         if down:
             status = f'{status}; DOWN'
@@ -1217,6 +1270,7 @@ class ThreadCog(commands.Cog):
     thread = app_commands.Group(name='thread', description='Commands for managing your thread.')
 
     @thread.command(name='pin', description='Pin or unpin a message in your thread, given you have permission.')
+    @discord.app_commands.describe(message_id='The ID of the message you want to pin or unpin.')
     async def sub_command(self, interaction, message_id: str):
         message = await interaction.channel.fetch_message(int(message_id))
         channel = interaction.channel
@@ -1234,6 +1288,7 @@ class ThreadCog(commands.Cog):
                 info(f'[{util.time()}] >LOG> {interaction.user.name} unpinned a message in their thread.')
 
     @thread.command(name='lock', description='Lock or unlock your thread, given you have permission.')
+    @discord.app_commands.describe(thread='The thread to lock or unlock.')
     async def sub_command(self, interaction, thread: Optional[discord.Thread]):
         if thread is None:
             thread = interaction.channel
@@ -1250,6 +1305,7 @@ class ThreadCog(commands.Cog):
                 info(f'[{util.time()}] >LOG> {interaction.user.name} unlocked their thread.')
 
     @thread.command(name='delete', description='Deletes your thread, given you have permission.')
+    @discord.app_commands.describe(thread='The thread to delete.')
     async def sub_command(self, interaction, thread: Optional[discord.Thread]):
         if thread is None:
             thread = interaction.channel
@@ -1264,6 +1320,7 @@ class ThreadCog(commands.Cog):
             await interaction.response.send_message(embed=embed, view=view)
 
     @thread.command(name='info', description='Displays info about the Thread.')
+    @discord.app_commands.describe(thread='The thread to get info about.')
     async def sub_command(self, interaction, thread: Optional[discord.Thread]):
         if thread is None:
             thread = interaction.channel
@@ -1327,6 +1384,11 @@ class ModCog(commands.Cog):
 
     @moderation.command(name='ban', description='Bans a user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
+    @discord.app_commands.describe(offender='The user to ban.',
+                                   reason='The reason for the ban.',
+                                   time='The length of this ban, if any.',
+                                   delete_messages='Whether to delete the messages of the user. (7 days)',
+                                   silent='Whether to notify the channel of this action.')
     async def sub_command(self, interaction, offender: discord.Member, reason: Optional[str] = 'No reason given',
                           time: Optional[str] = 'infinite', delete_messages: Optional[bool] = False,
                           silent: Optional[bool] = False):
@@ -1378,6 +1440,9 @@ I wish you a great day further!''')
 
     @moderation.command(name='unban', description='Unbans the user.')
     @discord.app_commands.checks.has_permissions(ban_members=True)
+    @discord.app_commands.describe(offender='The user to unban.',
+                                   reason='The reason for the unban.',
+                                   silent='Whether to notify the channel of this action.')
     async def unban(self, interaction, offender: discord.User, reason: Optional[str] = 'No reason given',
                     silent: Optional[bool] = False):
         reason_for_audit = f'{interaction.user.mention}: {reason}.'
@@ -1402,6 +1467,9 @@ I wish you a great day further!''')
 
     @moderation.command(name='kick', description='Kicks a user.')
     @discord.app_commands.checks.has_permissions(kick_members=True)
+    @discord.app_commands.describe(offender='The user to kick.',
+                                   reason='The reason for the kick.',
+                                   silent='Whether to notify the channel of this action.')
     async def sub_command(self, interaction, offender: discord.Member, reason: Optional[str] = 'No reason given',
                           silent: Optional[bool] = False):
         offender_dm = await offender.create_dm()
@@ -1420,6 +1488,10 @@ I wish you a great day further!''')
 
     @moderation.command(name='timeout', description='Times out a user.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
+    @discord.app_commands.describe(offender='The user to timeout.',
+                                   duration='The duration of the timeout. Maximum 28 days.',
+                                   reason='The reason for the timeout.',
+                                   silent='Whether to notify the channel of this action.')
     async def sub_command(self, interaction, offender: discord.Member, duration: str,
                           reason: Optional[str] = 'No reason given', silent: Optional[bool] = False):
         dur = util.format_duration(duration)
@@ -1486,6 +1558,7 @@ I wish you a great day further!''')
 
     @moderation.command(name='lock', description='Lock or unlock the channel.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
+    @discord.app_commands.describe(silent='Whether to notify the channel of this action.')
     async def sub_command(self, interaction, silent: Optional[bool] = False):
         channel = interaction.channel
         if channel.type != discord.ChannelType.text:
@@ -1510,6 +1583,8 @@ I wish you a great day further!''')
 
     @moderation.command(name='slowmode', description='Set a slowmode for the channel.')
     @discord.app_commands.checks.has_permissions(moderate_members=True)
+    @discord.app_commands.describe(channel='The channel to set the slowmode for.',
+                                   duration='The duration of the slowmode. Maximum 6 hours.')
     async def sub_command(self, interaction, channel: Optional[discord.TextChannel], duration: str,
                           silent: Optional[bool] = False):
         dur = util.format_duration(duration)
