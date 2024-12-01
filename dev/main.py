@@ -14,7 +14,7 @@ import database
 import vars
 import cogs
 import util
-from util import info
+from util import info, info_time
 
 
 # Clients
@@ -104,14 +104,9 @@ class CordBot(commands.Bot):
         info('------------------------------Thanks for using CordCrafter!-------------------------------')
         info('')
         info('>> The following messages are messages that are colloquially perceived as "random".')
-        info('-------------------------------------CordCrafter Log--------------------------------------')
+        info('---------------------------------------Runtime Log----------------------------------------')
 
-    def get_start_time(self):
-        return self._start_time
-
-    def get(self):
-        return self
-
+    # TODO>GOAL: Fix this attribute error.
     @tasks.loop(hours=4)
     async def post_bump(self):
         forum = self.get_channel(vars.team_forum)
@@ -121,7 +116,7 @@ class CordBot(commands.Bot):
             if trusted_tag in post.applied_tags:
                 msg = await post.send(content='Auto-Bump.')
                 await msg.delete()
-        info(f'[{util.time()}] >LOG> #{forum.name} posts bumped.')
+        info_time(f'>LOG> #{forum.name} posts bumped.')
 
     @tasks.loop(minutes=1)
     async def check_temp_bans(self):
@@ -137,9 +132,9 @@ class CordBot(commands.Bot):
                 try:
                     await guild.unban(discord.Object(id=user_id), reason="A temporary ban expired")
                     await database.remove_temp_ban(user_id)
-                    info(f'[{util.time()}] >LOG> Unbanned a Tempban.')
+                    info_time(f'>LOG> Unbanned a Tempban.')
                 except discord.HTTPException:
-                    info(f'[{util.time()}] >LOG> Something went wrong while Unbanning a Tempban.')
+                    info_time(f'>LOG> Something went wrong while Unbanning a Tempban.')
                     continue
 
 

@@ -17,7 +17,7 @@ async def send_webhook(url: str, content: str, title: str) -> None:
         date_today = date.today().strftime('%d/%m/%Y')
         embed.set_footer(text=f'On {date_today} at {time_now}')
         await webhook.send(embed=embed)
-    info(f'[{time()}] >LOG> aiohttp client session used for Webhook.')
+    info_time(f'>LOG> aiohttp client session used for Webhook.')
 
 
 async def sanitize(interaction, member):
@@ -36,11 +36,11 @@ async def sanitize(interaction, member):
             embed = discord.Embed(colour=discord.Colour.green(),
                                   description=f'Changed `{nick}` to placeholder `Robin`.')
             await interaction.followup.send(embed=embed, ephemeral=True)
-            info(f'[{time()}] >LOG> Member sanitized: {nick} -> {clean_name}.]')
+            info_time(f'>LOG> Member sanitized: {nick} -> {clean_name}.]')
         else:
             embed = discord.Embed(colour=discord.Colour.green(), description=f'Changed `{nick}` to `{clean_name}`.')
             await interaction.followup.send(embed=embed, ephemeral=True)
-            info(f'[{time()}] >LOG> Member sanitized: {nick} -> {clean_name}.]')
+            info_time(f'>LOG> Member sanitized: {nick} -> {clean_name}.]')
     else:
         wet_name = nick
         clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
@@ -51,7 +51,7 @@ async def sanitize(interaction, member):
                                'Nick Change:')
             embed = discord.Embed(colour=discord.Colour.green(), description=f'Changed `{nick}` to `{clean_name}`.')
             await interaction.followup.send(embed=embed, ephemeral=True)
-            info(f'[{time()}] >LOG> Member sanitized: {nick} -> {clean_name}.]')
+            info_time(f'>LOG> Member sanitized: {nick} -> {clean_name}.]')
         else:
             view = views.ShowDebugButton(nick=nick)
             embed = discord.Embed(colour=discord.Colour.red(),
@@ -109,7 +109,6 @@ def get_log_filename():
     return f'cordcrafter-{timestamp}.log'
 
 
-# Store the current log filename as a module-level variable
 current_log_file = get_log_filename()
 
 
@@ -118,3 +117,7 @@ def info(txt: str):
     with open(log_path, 'a') as f:
         print(txt)
         f.write(txt + '\n')
+
+
+def info_time(txt: str):
+    info(f'[{time()}] {txt}')

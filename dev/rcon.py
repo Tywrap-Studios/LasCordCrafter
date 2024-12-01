@@ -4,9 +4,8 @@ import aiohttp
 import discord
 from mcrcon import MCRcon
 
-import util
 import vars
-from util import info
+from util import info_time
 
 # RCON Variables needed for the client
 rcon_pass = vars.rcon_pass_env
@@ -65,25 +64,25 @@ async def handle_rcon(command, ctx):
                                   title='RCON: <:resources:1278835693900136532>')
             await send_log_webhook(command=command, response=response, source=ctx.user)
             await ctx.response.send_message(embed=embed, ephemeral=True)
-            info(f'[{util.time()}] >RCON> Package sent: `{command}`, Source: {ctx.user.name}, Response: {response}')
+            info_time(f'>RCON> Package sent: `{command}`, Source: {ctx.user.name}, Response: {response}')
         except ConnectionRefusedError as e:
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'The connection could not be made as the server actively refused it.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# {e}',
                                   title='RCON: <:resources:1278835693900136532>')
             await ctx.response.send_message(embed=embed, ephemeral=True)
-            info(f'[{util.time()}] >RCON> A connection could not be made as the server actively refused it.')
+            info_time(f'>RCON> A connection could not be made as the server actively refused it.')
         except (ConnectionResetError, ConnectionAbortedError) as e:
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'The connection was terminated, the server may have been stopped.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# {e}',
                                   title='RCON: <:resources:1278835693900136532>')
             await ctx.response.send_message(embed=embed, ephemeral=True)
-            info(f'[{util.time()}] >RCON> The connection was terminated, the server may have been stopped.')
+            info_time(f'>RCON> The connection was terminated, the server may have been stopped.')
         except Exception as e:
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'Something went wrong connecting to the RCON Client.<:warn:1249069667159638206>\nPlease report this on a [GitHub issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) if this seems random.\n-# {e}',
                                   title='RCON: <:resources:1278835693900136532>')
             await ctx.response.send_message(embed=embed, ephemeral=True)
-            info(f'[{util.time()}] >RCON> Something went wrong connecting to the RCON Client.')
+            info_time(f'>RCON> Something went wrong connecting to the RCON Client.')
 
 
 # This is for the on_message() event to send the message to the Minecraft Server.
@@ -92,4 +91,4 @@ async def handle_message(command, channel):
         try:
             mcr.command(command)
         except Exception as e:
-            info(f'[{util.time()}] >RCON> Something went wrong connecting to the RCON Client. {e}')
+            info_time(f'>RCON> Something went wrong connecting to the RCON Client. {e}')

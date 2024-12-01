@@ -35,7 +35,7 @@ class ConfirmButton(discord.ui.View):
         embed.set_footer(text=f'{datetoday} {time}')
         await ctx.channel.delete(reason=f'Closed ticket {ctx.channel.mention}')
         await ticket_log_channel.send(embed=embed)
-        util.info(f'[{util.time()}] >LOG> {closer.name} Closed ticket by {op.name}.]')
+        util.info_time(f'>LOG> {closer.name} Closed ticket by {op.name}.]')
 
 
 class CloseTicketButton(discord.ui.View):
@@ -80,7 +80,7 @@ class ManualAppealButton(discord.ui.View):
         await channel.send(embed=embed, view=view)
         await ctx.response.send_message(content=f'Thanks {ctx.user.mention}, I made {channel.mention} for you!',
                                         ephemeral=True)
-        util.info(f'[{util.time()}] >LOG> {ctx.user.name} Opened ticket.]')
+        util.info_time(f'>LOG> {ctx.user.name} Opened ticket.]')
 
 
 class RemoveButton(discord.ui.View):
@@ -101,7 +101,7 @@ class RemoveButton(discord.ui.View):
                                   description=f"{member.mention} has been removed from the ticket by {ctx.user.mention}.",
                                   colour=discord.Colour.dark_gray())
             await ctx.response.send_message(embed=embed)
-            util.info(f'[{util.time()}] >LOG> {ctx.author.name} removed {member.name} from {ctx.channel.name}.')
+            util.info_time(f'>LOG> {ctx.author.name} removed {member.name} from {ctx.channel.name}.')
         else:
             await ctx.response.send_message("This isn't a ticket!", ephemeral=True)
 
@@ -115,10 +115,10 @@ class ShowDebugButton(discord.ui.View):
         self.nick: str = nick
         super().__init__(timeout=None)
 
-    @discord.ui.button(label='Show Debug util.info', style=discord.ButtonStyle.gray, emoji='☑️')
+    @discord.ui.button(label='Show Debug info', style=discord.ButtonStyle.gray, emoji='☑️')
     async def onclick(self, ctx, button: discord.ui.Button):
         attempted_nick = self.nick
-        embed = discord.Embed(colour=discord.Colour.dark_embed(), title='__Debug util.info__', description=f'''
+        embed = discord.Embed(colour=discord.Colour.dark_embed(), title='__Debug info__', description=f'''
 ```
 Current Regex Pattern:
 {vars.repat}
@@ -153,7 +153,7 @@ class DeleteEmbed(discord.ui.View):
         message = self.message
         await message.delete()
         await ctx.response.send_message('Message Deleted.', ephemeral=True)
-        util.info(f'[{util.time()}] >LOG> {ctx.author.name} deleted an Embed they sent.')
+        util.info_time(f'>LOG> {ctx.author.name} deleted an Embed they sent.')
 
 
 class ConfirmDeleteThreadButton(discord.ui.View):
@@ -169,4 +169,4 @@ class ConfirmDeleteThreadButton(discord.ui.View):
     async def onclick(self, ctx, button: discord.ui.Button):
         thread = self.thread
         await thread.delete()
-        util.info(f'[{util.time()}] >LOG> {ctx.author.name} deleted their thread.')
+        util.info_time(f'>LOG> {ctx.author.name} deleted their thread.')

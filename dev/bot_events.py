@@ -7,15 +7,15 @@ from discord.ext import commands
 import rcon
 import util
 import vars
-from util import info
+from util import info_time
 
 
 # On Ready:
 async def on_ready(bot: commands.Bot) -> None:
-    info(f'[{util.time()}] >LOG> Setting Discord Bot Status. . .')
+    info_time(f'>LOG> Setting Discord Bot Status. . .')
     await bot.change_presence(activity=discord.Game('on CordCraft Season 2.'), status=discord.Status.online)
-    info(f'[{util.time()}] >LOG> Discord Bot Status Set.')
-    info(f'[{util.time()}] >EVENT> Bot Ready.')
+    info_time(f'>LOG> Discord Bot Status Set.')
+    info_time(f'>EVENT> Bot Ready.')
 
 
 # On Member join:
@@ -29,7 +29,7 @@ async def on_member_join(member: discord.Member) -> None:
         clean_name = f'{clean_name_cs}'
         await member.edit(nick=clean_name)
         await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
-        info(f'[{util.time()}] >EVENT> Member joined: {nick} -> {clean_name}.')
+        info_time(f'>EVENT> Member joined: {nick} -> {clean_name}.')
     else:
         wet_name = nick
         clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
@@ -37,9 +37,9 @@ async def on_member_join(member: discord.Member) -> None:
         if clean_name != nick:
             await member.edit(nick=clean_name)
             await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
-            info(f'[{util.time()}] >EVENT> Member joined: {nick} -> {clean_name}.')
+            info_time(f'>EVENT> Member joined: {nick} -> {clean_name}.')
         else:
-            info(f'[{util.time()}] >EVENT> Member joined: {nick}.')
+            info_time(f'>EVENT> Member joined: {nick}.')
     dm = await member.create_dm()
     w_embed = discord.Embed(colour=discord.Colour.yellow(), title='Welcome!', description=f'''Welcome to GunjiCordia!
 We hope you're going to have a great time here!
