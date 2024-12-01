@@ -77,4 +77,4 @@ fabric.properties
 *.env
 logs/
 databases/
-temp.py
+dev/temp.py
