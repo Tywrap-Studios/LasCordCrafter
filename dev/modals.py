@@ -10,8 +10,9 @@ from util import info_time
 
 
 class DowntimeModal(discord.ui.Modal, title='Status Info'):
-    def __init__(self, bot: commands.bot, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
-        self.title = title
+    def __init__(self, bot: commands.bot, status_title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
+        self.title = f'{status_title} -> Info'
+        self.status_title = status_title
         self.bot = bot
         self.channel = channel
         self.ping = ping
@@ -75,8 +76,9 @@ class DowntimeModal(discord.ui.Modal, title='Status Info'):
 
 
 class DowntimeUpdateModal(discord.ui.Modal, title='Status Info'):
-    def __init__(self, bot: commands.bot, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
-        self.title = title
+    def __init__(self, bot: commands.bot, status_title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
+        self.title = f'{status_title} -> Info'
+        self.status_title = status_title
         self.bot = bot
         self.channel = channel
         self.ping = ping
@@ -126,8 +128,9 @@ class DowntimeUpdateModal(discord.ui.Modal, title='Status Info'):
 
 
 class UptimeModal(discord.ui.Modal, title='Status Info'):
-    def __init__(self, bot: commands.bot, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
-        self.title = title
+    def __init__(self, bot: commands.bot, status_title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
+        self.title = f'{status_title} -> Info'
+        self.status_title = status_title
         self.bot = bot
         self.channel = channel
         self.ping = ping
