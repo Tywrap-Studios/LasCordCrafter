@@ -1079,7 +1079,7 @@ class CmdCog(commands.Cog):
 class StatusCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.current_downtime = 'No active downtime.'
+        self.current_downtime = None
 
     async def title_autocomplete(self, interaction, current) -> List[app_commands.Choice[str]]:
         choice = self.current_downtime
@@ -1091,9 +1091,9 @@ class StatusCog(commands.Cog):
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
     @discord.app_commands.describe(title='The title of the downtime.')
     @discord.app_commands.autocomplete(title=title_autocomplete)
-    async def sub_command(self, interaction, title: str):
+    async def sub_command(self, interaction, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
         self.current_downtime = title
-        modal = modals.DowntimeModal(bot=self.bot, title=title)
+        modal = modals.DowntimeModal(bot=self.bot, title=title, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='update',
@@ -1101,9 +1101,9 @@ class StatusCog(commands.Cog):
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
     @discord.app_commands.describe(title='The title of the downtime.')
     @discord.app_commands.autocomplete(title=title_autocomplete)
-    async def sub_command(self, interaction, title: str):
+    async def sub_command(self, interaction, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
         self.current_downtime = title
-        modal = modals.DowntimeUpdateModal(bot=self.bot, title=title)
+        modal = modals.DowntimeUpdateModal(bot=self.bot, title=title, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='uptime',
@@ -1111,16 +1111,16 @@ class StatusCog(commands.Cog):
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
     @discord.app_commands.describe(title='The title of the downtime.')
     @discord.app_commands.autocomplete(title=title_autocomplete)
-    async def sub_command(self, interaction, title: str):
-        self.current_downtime = 'No active downtime.'
-        modal = modals.UptimeModal(bot=self.bot, title=title)
+    async def sub_command(self, interaction, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
+        self.current_downtime = None
+        modal = modals.UptimeModal(bot=self.bot, title=title, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='notice',
                     description='Pregen a Notice Embed.')
     @discord.app_commands.checks.has_any_role(vars.discordAdmin, vars.minecraftAdmin, vars.centralHosting, vars.gunjiCord)
-    async def sub_command(self, interaction):
-        modal = modals.NoticeModal(bot=self.bot)
+    async def sub_command(self, interaction, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
+        modal = modals.NoticeModal(bot=self.bot, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='bot-status', description='Change the Bot\'s status to say Minecraft Server Stati.')
