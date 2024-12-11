@@ -1093,7 +1093,7 @@ class StatusCog(commands.Cog):
     @discord.app_commands.autocomplete(title=title_autocomplete)
     async def sub_command(self, interaction, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
         self.current_downtime = title
-        modal = modals.DowntimeModal(bot=self.bot, title=title, channel=channel, ping=ping)
+        modal = modals.DowntimeModal(bot=self.bot, status_title=title, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='update',
@@ -1103,7 +1103,7 @@ class StatusCog(commands.Cog):
     @discord.app_commands.autocomplete(title=title_autocomplete)
     async def sub_command(self, interaction, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
         self.current_downtime = title
-        modal = modals.DowntimeUpdateModal(bot=self.bot, title=title, channel=channel, ping=ping)
+        modal = modals.DowntimeUpdateModal(bot=self.bot, status_title=title, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='uptime',
@@ -1113,7 +1113,7 @@ class StatusCog(commands.Cog):
     @discord.app_commands.autocomplete(title=title_autocomplete)
     async def sub_command(self, interaction, title: str, channel: Optional[discord.TextChannel], ping: Optional[discord.Role]):
         self.current_downtime = None
-        modal = modals.UptimeModal(bot=self.bot, title=title, channel=channel, ping=ping)
+        modal = modals.UptimeModal(bot=self.bot, status_title=title, channel=channel, ping=ping)
         await interaction.response.send_modal(modal)
 
     @status.command(name='notice',
