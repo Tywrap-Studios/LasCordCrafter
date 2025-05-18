@@ -69,3 +69,23 @@ async def on_message(message: discord.Message, bot: commands.Bot) -> None:
             await rcon.handle_message(command, channel)
     else:
         pass
+
+
+async def on_member_change(before: discord.Member, after: discord.Member):
+    if after.display_name is not before.display_name:
+        nick = after.display_name
+        if re.match(vars.repat, nick):
+            wet_name = re.sub(vars.repatce, '', nick)
+            if len(wet_name) < 1:
+                wet_name = 'Robin'
+            clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
+            clean_name = f'{clean_name_cs}'
+            await after.edit(nick=clean_name)
+            await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
+        else:
+            wet_name = nick
+            clean_name_cs: CuredString = parse(wet_name, retain_capitalization=True, retain_emojis=True)
+            clean_name = f'{clean_name_cs}'
+            if clean_name != nick:
+                await after.edit(nick=clean_name)
+                await util.send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.', 'Nick Change:')
