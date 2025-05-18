@@ -33,6 +33,10 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         await bot_events.on_member_join(member)
+    
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        await bot_events.on_member_change(before, after)
 
 
 class StandaloneCog(commands.Cog):

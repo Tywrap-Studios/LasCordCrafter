@@ -21,7 +21,6 @@ async def send_webhook(url: str, content: str, title: str) -> None:
 
 
 async def sanitize(interaction, member):
-    await interaction.response.defer(thinking=True)
     nick = member.display_name
     if re.match(vars.repat, nick):
         wet_name = re.sub(vars.repatce, '', nick)
@@ -35,11 +34,11 @@ async def sanitize(interaction, member):
         if member.display_name == 'Robin':
             embed = discord.Embed(colour=discord.Colour.green(),
                                   description=f'Changed `{nick}` to placeholder `Robin`.')
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             info_time(f'>LOG> Member sanitized: {nick} -> {clean_name}.]')
         else:
             embed = discord.Embed(colour=discord.Colour.green(), description=f'Changed `{nick}` to `{clean_name}`.')
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             info_time(f'>LOG> Member sanitized: {nick} -> {clean_name}.]')
     else:
         wet_name = nick
@@ -50,13 +49,13 @@ async def sanitize(interaction, member):
             await send_webhook(vars.sanitization_webhook_url, f'Changed nick from **{nick}** to **{clean_name}**.',
                                'Nick Change:')
             embed = discord.Embed(colour=discord.Colour.green(), description=f'Changed `{nick}` to `{clean_name}`.')
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             info_time(f'>LOG> Member sanitized: {nick} -> {clean_name}.]')
         else:
             view = views.ShowDebugButton(nick=nick)
             embed = discord.Embed(colour=discord.Colour.red(),
                                   description=f'"`{nick}`" seems fine and is not cancerous or intentionally hoisted.\nIf you think it is, please make a [GitHub Issue](<https://github.com/Tywrap-Studios/LasCordCrafter/issues>) and send the Debug Info.')
-            await interaction.followup.send(embed=embed, ephemeral=True, view=view)
+            await interaction.response.send_message(embed=embed, ephemeral=True, view=view)
 
 
 def format_duration(text: str) -> str:
