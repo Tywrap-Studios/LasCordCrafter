@@ -53,7 +53,8 @@ class CordBot(commands.Bot):
         self._start_time = time.time()
         info('Timer Started.')
         info('Starting Background Tasks. . .')
-        self.post_bump.start()
+        
+        #self.post_bump.start() Tasks are started before boat loads, so stuff like get_channel() may not work because it requires bot to be loaded. Instead, it would be better to start task fter setup hook awaiting on_ready()
         self.check_temp_bans.start()
         info('Background Tasks Started.')
         info('Registering Cogs. . .')
@@ -105,8 +106,11 @@ class CordBot(commands.Bot):
         info('')
         info('>> The following messages are messages that are colloquially perceived as "random".')
         info('---------------------------------------Runtime Log----------------------------------------')
-
-    # TODO>GOAL: Fix this attribute error.
+    # This will most likely solve the issue with atribute error. It starts the task loop after bot loads. It worked for me.
+    async def on_ready(self):
+        if not self.post_bump.is_running():
+            self.post_bump.start()
+    
     @tasks.loop(hours=4)
     async def post_bump(self):
         forum = self.get_channel(vars.team_forum)
@@ -117,7 +121,7 @@ class CordBot(commands.Bot):
                 msg = await post.send(content='Auto-Bump.')
                 await msg.delete()
         info_time(f'>LOG> #{forum.name} posts bumped.')
-
+    
     @tasks.loop(minutes=1)
     async def check_temp_bans(self):
         active_bans = await database.get_active_bans()
