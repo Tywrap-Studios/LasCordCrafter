@@ -35,11 +35,12 @@ class CordBot(commands.Bot):
         info('------------------------------------------Login-------------------------------------------')
         info(f'Logged in as {self.user} (ID: {self.user.id})')
         info('-----------------------------------------Software-----------------------------------------')
-        info('''   ____              _  ____            __ _                _        __          ___  
-  / ___|___  _ __ __| |/ ___|_ __ __ _ / _| |_ ___ _ __    / |      / /_        / _ \ 
- | |   / _ \| '__/ _` | |   | '__/ _` | |_| __/ _ \ '__|   | |     | '_ \      | | | |
- | |__| (_) | | | (_| | |___| | | (_| |  _| ||  __/ |      | |  _  | (_) |  _  | |_| |
-  \____\___/|_|  \__,_|\____|_|  \__,_|_|  \__\___|_|      |_| (_)  \___/  (_)  \___/ ''')
+        info('''   _____              _  _____            __ _                __         __        __ 
+  / ____|            | |/ ____|          / _| |              /_ |       / /       /_ |
+ | |     ___  _ __ __| | |     _ __ __ _| |_| |_ ___ _ __     | |      / /_        | |
+ | |    / _ \| '__/ _` | |    | '__/ _` |  _| __/ _ \ '__|    | |     | '_ \       | |
+ | |___| (_) | | | (_| | |____| | | (_| | | | ||  __/ |       | |  _  | (_) |  _   | |
+  \_____\___/|_|  \__,_|\_____|_|  \__,_|_|  \__\___|_|       |_| (_)  \___/  (_)  |_|''')
         info('-------------------------------------------Init-------------------------------------------')
         info('Checking for old log files. . .')
         log_files = [f for f in os.listdir(vars.log_dir_path) if f.startswith('cordcrafter-')]
@@ -106,10 +107,6 @@ class CordBot(commands.Bot):
         info('')
         info('>> The following messages are messages that are colloquially perceived as "random".')
         info('---------------------------------------Runtime Log----------------------------------------')
-    # This will most likely solve the issue with atribute error. It starts the task loop after bot loads. It worked for me.
-    async def on_ready(self):
-        if not self.post_bump.is_running():
-            self.post_bump.start()
     
     @tasks.loop(hours=4)
     async def post_bump(self):

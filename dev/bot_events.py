@@ -15,6 +15,10 @@ async def on_ready(bot: commands.Bot) -> None:
     info_time(f'>LOG> Setting Discord Bot Status. . .')
     await bot.change_presence(activity=discord.Game('on CordCraft.'), status=discord.Status.online)
     info_time(f'>LOG> Discord Bot Status Set.')
+    # We can assume that the commands.Bot is an instance of CordBot
+    if not bot.post_bump.is_running():
+            bot.post_bump.start()
+    info_time(f'>LOG> Checking and initialising Bump Post task.')
     info_time(f'>EVENT> Bot Ready.')
 
 
